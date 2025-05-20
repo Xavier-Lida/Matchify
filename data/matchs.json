@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "division": 1,
+    "receveur": "Cerveza FC",
+    "visiteur": "Black Stars",
+    "date": "2025-05-24",
+    "heure": "19:00",
+    "terrain": "Gymnase A"
+  },
+  {
+    "id": 2,
+    "division": 1,
+    "receveur": "Maintown",
+    "visiteur": "Les Lynx",
+    "date": "2025-05-25",
+    "heure": "18:30",
+    "terrain": "Gymnase B"
+  }
+]
