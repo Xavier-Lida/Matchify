@@ -7,7 +7,7 @@ fetch('data/matchs.json')
       if (match.score1 == null || match.score2 == null) return; // ignorer si pas encore joué
 
       // Initialiser les équipes si pas encore dans stats
-      [match.equipe1, match.equipe2].forEach(equipe => {
+      [match.receveur, match.visiteur].forEach(equipe => {
         if (!stats[equipe]) {
           stats[equipe] = {
             equipe: equipe, MJ: 0, V: 0, N: 0, D: 0, BP: 0, BC: 0, Pts: 0
@@ -15,8 +15,8 @@ fetch('data/matchs.json')
         }
       });
 
-      const team1 = stats[match.equipe1];
-      const team2 = stats[match.equipe2];
+      const team1 = stats[match.receveur];
+      const team2 = stats[match.visiteur];
 
       team1.MJ++; team2.MJ++;
       team1.BP += match.score1; team1.BC += match.score2;
