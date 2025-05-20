@@ -3,7 +3,7 @@ body {
   margin: 2em;
   background: #f5f5f5;
 }
-#matchs {
+#horaire {
   display: flex;
   flex-direction: column;
   gap: 1em;
