@@ -1,0 +1,20 @@
+{
+  "name": "matchify",
+  "version": "1.0.0",
+  "description": "Matchify est une plateforme tout-en-un pour la gestion de ligues sportives. Suivez les classements, affichez les résultats en temps réel et organisez vos matchs en quelques clics. Avec son module de paris amicaux, Matchify ajoute une touche de compétition entre amis… même en dehors du terrain.",
+  "main": "index.js",
+  "scripts": {
+    "devStart": "nodemon server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "express": "^5.1.0",
+    "express-session": "^1.18.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
