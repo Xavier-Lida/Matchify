@@ -1,25 +1,25 @@
 const express = require('express');
 const session = require('express-session');
+const path = require('path');
 const app = express();
 
 app.use(express.json());
-app.use(express.static('public')); // Tes fichiers HTML/JS
+app.use(express.static('public'));
+
 app.use(session({
-  secret: 'futsalSecret123',
+  secret: 'secret-futsal',
   resave: false,
   saveUninitialized: true
 }));
 
-// Simuler des comptes
-const codes = [
-  { equipe: 'Shawinigan', code: 'shaw123' },
-  { equipe: 'Nicolet', code: 'nico456' }
-];
+// 📁 Données
+const codes = require('./data/connexions.json');
+const matchs = require('./data/matchs.json');
 
 // Connexion
 app.post('/login', (req, res) => {
   const { code } = req.body;
-  const found = codes.find(c => c.code === code);
+  const found = codes.find(e => e.code === code);
   if (found) {
     req.session.equipe = found.equipe;
     res.json({ success: true });
@@ -28,15 +28,12 @@ app.post('/login', (req, res) => {
   }
 });
 
-// Données sécurisées
+// Matchs
 app.get('/mes-matchs', (req, res) => {
   if (!req.session.equipe) return res.status(401).json({ error: 'Non connecté' });
-
-  const matchs = require('./data/matchs.json');
-  const matchsEquipe = matchs.filter(m =>
-    m.equipe1 === req.session.equipe || m.equipe2 === req.session.equipe
-  );
-  res.json({ equipe: req.session.equipe, matchs: matchsEquipe });
+  const equipe = req.session.equipe;
+  const matchsEquipe = matchs.filter(m => m.equipe1 === equipe || m.equipe2 === equipe);
+  res.json({ equipe, matchs: matchsEquipe });
 });
 
 // Déconnexion
@@ -44,4 +41,6 @@ app.post('/logout', (req, res) => {
   req.session.destroy(() => res.json({ success: true }));
 });
 
-app.listen(3000, () => console.log('Serveur sur http://localhost:3000'));
+app.listen(3000, () => {
+  console.log('Serveur en ligne sur http://localhost:3000');
+});
