@@ -6,7 +6,7 @@ function Header() {
           <a className="text-2xl font-semibold hover:opacity-90">Matchify</a>
         </div>
         <div className="flex-none">
-          <ul className="menu menu-horizontal px-1">
+          <ul className="menu menu-horizontal px-1 font-semibold">
             <li>
               <a>Connexion</a>
             </li>

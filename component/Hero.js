@@ -9,7 +9,7 @@ function Hero() {
             <br></br>
             Pour suivre les matchs, les classements, les statistiques et faire vos prédictions!
           </p>
-          <button className="btn btn-primary">Commencer</button>
+          <button className="btn btn-primary btn-xl">Commencer</button>
         </div>
       </div>
     </div>
