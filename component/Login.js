@@ -10,8 +10,16 @@ function Login() {
           </h2>
 
           <GoogleButton />
-
+          {/*
           <div className="divider">OU</div>
+
+          <label className="label">Nom d'utilisateur</label>
+          <input
+            type="text"
+            className="input bg-white"
+            placeholder="Nom d'utilisateur"
+          />
+
           <label className="label">Courriel</label>
           <input
             type="email"
@@ -26,11 +34,12 @@ function Login() {
             placeholder="Mot de passe"
           />
 
-          <div className="justify-end card-actions mt-5">
-            <button className="btn btn-primary hover:bg-base-300">
+          <div className="card-actions mt-5">
+            <button className="btn btn-primary hover:bg-base-300 w-full">
               Connexion
             </button>
           </div>
+          */}
         </div>
       </div>
     </div>

@@ -1,8 +1,9 @@
+import ConnexionButton from "./ConnexionButton";
 import Link from "next/link";
 
 function Header() {
   return (
-    <div className="fixed navbar bg-base-100 shadow-sm justify-center">
+    <div className="fixed navbar bg-base-100 shadow-sm justify-center z-100">
       <div className="flex w-8/10 h-full items-center">
         <div className="flex-1">
           <Link href="/" className="text-2xl font-semibold hover:opacity-90">
@@ -12,7 +13,7 @@ function Header() {
         <div className="flex-none">
           <ul className="menu menu-horizontal px-1 font-semibold">
             <li>
-              <Link href="/login">Connexion</Link>
+              <ConnexionButton />
             </li>
             {/*<li>
             <details>
