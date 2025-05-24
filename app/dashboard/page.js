@@ -1,6 +1,9 @@
 import { MY_EMAIL } from "@/constants";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
+import Dashboard from "@/component/dashboard/Dashboard";
+import Sidebar from "@/component/dashboard/Sidebar";
+import TeamManager from "@/component/dashboard/TeamManager";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -10,9 +13,9 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen algin-center">
-      <h1>Dashboard</h1>
-      <p>Welcome, {session.user?.email}!</p>
+    <div className="flex items-center justify-center min-h-screen">
+      <Sidebar />
+      <TeamManager />
     </div>
   );
 }
