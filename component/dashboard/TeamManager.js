@@ -1,13 +1,10 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import TeamCard from "./TeamCard";
 import TeamForm from "./TeamForm";
-import { teams } from "@/constants";
-
-const initialTeams = teams
 
 export default function TeamManager() {
-	const [teams, setTeams] = useState(initialTeams);
+	const [teams, setTeams] = useState([]);
 	const [showAdd, setShowAdd] = useState(false);
 	const [editId, setEditId] = useState(null);
 	const [form, setForm] = useState({
@@ -17,29 +14,41 @@ export default function TeamManager() {
 		logo: "",
 	});
 
+	// Fetch teams from the API on mount
+	useEffect(() => {
+		fetch("/api/teams")
+			.then((res) => res.json())
+			.then(setTeams);
+	}, []);
+
 	const handleChange = (e) => {
 		const { name, value } = e.target;
 		setForm((f) => ({ ...f, [name]: value }));
 	};
 
-	const handleAdd = (e) => {
+	const handleAdd = async (e) => {
 		e.preventDefault();
-		setTeams((prev) => [
-			...prev,
-			{
-				id: Date.now(),
-				name: form.name,
-				division: form.division,
-				points: form.points ? Number(form.points) : 0,
-				logo: form.logo || "https://placehold.co/60x60",
-			},
-		]);
+		const newTeam = {
+			name: form.name,
+			division: form.division,
+			points: form.points ? Number(form.points) : 0,
+			logo: form.logo || "https://placehold.co/60x60",
+		};
+		await fetch("/api/teams", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(newTeam),
+		});
+		// Refetch teams from the API
+		fetch("/api/teams")
+			.then((res) => res.json())
+			.then(setTeams);
 		setForm({ name: "", division: "", points: "", logo: "" });
 		setShowAdd(false);
 	};
 
 	const handleEdit = (team) => {
-		setEditId(team.id);
+		setEditId(team._id);
 		setForm({
 			name: team.name,
 			division: team.division,
@@ -48,27 +57,35 @@ export default function TeamManager() {
 		});
 	};
 
-	const handleSave = (e) => {
+	const handleSave = async (e) => {
 		e.preventDefault();
-		setTeams((prev) =>
-			prev.map((team) =>
-				team.id === editId
-					? {
-							...team,
-							name: form.name,
-							division: form.division,
-							points: form.points ? Number(form.points) : 0,
-							logo: form.logo || "https://placehold.co/60x60",
-					  }
-					: team
-			)
-		);
+		await fetch("/api/teams", {
+			method: "PUT",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({
+				_id: editId,
+				name: form.name,
+				division: form.division,
+				points: form.points ? Number(form.points) : 0,
+				logo: form.logo || "https://placehold.co/60x60",
+			}),
+		});
+		// Refetch teams from the API
+		fetch("/api/teams")
+			.then((res) => res.json())
+			.then(setTeams);
 		setEditId(null);
 		setForm({ name: "", division: "", points: "", logo: "" });
 	};
 
-	const handleDelete = (id) => {
-		setTeams((prev) => prev.filter((team) => team.id !== id));
+	const handleDelete = async (id) => {
+		await fetch(`/api/teams?id=${id}`, {
+			method: "DELETE",
+		});
+		// Refetch teams from the API
+		fetch("/api/teams")
+			.then((res) => res.json())
+			.then(setTeams);
 	};
 
 	return (
@@ -103,9 +120,9 @@ export default function TeamManager() {
 			{/* Teams List */}
 			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 				{teams.map((team) =>
-					editId === team.id ? (
+					editId === team._id ? (
 						<TeamForm
-							key={team.id}
+							key={team._id}
 							form={form}
 							onChange={handleChange}
 							onSubmit={handleSave}
@@ -114,10 +131,10 @@ export default function TeamManager() {
 						/>
 					) : (
 						<TeamCard
-							key={team.id}
+							key={team._id}
 							team={team}
 							onEdit={handleEdit}
-							onDelete={handleDelete}
+							onDelete={() => handleDelete(team._id)}
 						/>
 					)
 				)}
