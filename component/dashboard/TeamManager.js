@@ -2,23 +2,9 @@
 import { useState } from "react";
 import TeamCard from "./TeamCard";
 import TeamForm from "./TeamForm";
+import { teams } from "@/constants";
 
-const initialTeams = [
-	{
-		id: 1,
-		name: "Tigers",
-		division: "A",
-		points: 32,
-		logo: "https://placekitten.com/60/60",
-	},
-	{
-		id: 2,
-		name: "Lions",
-		division: "B",
-		points: 28,
-		logo: "https://placekitten.com/61/61",
-	},
-];
+const initialTeams = teams
 
 export default function TeamManager() {
 	const [teams, setTeams] = useState(initialTeams);

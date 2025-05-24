@@ -1,13 +1,21 @@
+"use client";
+
 import ConnexionButton from "./ConnexionButton";
 import DashboardButton from "./DashboardButton";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 
 function Header() {
+  const { data: session } = useSession();
+
   return (
     <div className="fixed navbar bg-base-100 shadow-sm justify-center z-100">
       <div className="flex w-8/10 h-full items-center">
         <div className="flex-1">
-          <Link href="/" className="text-2xl font-semibold hover:opacity-90">
+          <Link
+            href={session ? "/home" : "/"}
+            className="text-2xl font-semibold hover:opacity-90"
+          >
             Matchify
           </Link>
         </div>
