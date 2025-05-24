@@ -5,7 +5,7 @@ import { signIn } from "next-auth/react";
 export default function GoogleButton() {
   return (
     <button
-      onClick={() => signIn("google")}
+      onClick={() => signIn("google", { callbackUrl: "/home" })}
       className="btn bg-white text-black border-[#e5e5e5] w-full"
     >
       <svg

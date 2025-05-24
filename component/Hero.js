@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 function Hero() {
   return (
     <div className="hero bg-base-300 min-h-screen">
@@ -6,10 +8,12 @@ function Hero() {
           <h1 className="text-5xl font-bold">Matchify</h1>
           <p className="py-4">
             <span className="text-lg font-bold">Site officiel de la Ligue Fustal Mauricie.</span>
-            <br></br>
+            <br />
             Pour suivre les matchs, les classements, les statistiques et faire vos prédictions!
           </p>
-          <button className="btn btn-primary btn-xl">Commencer</button>
+          <Link href="/home" className="btn btn-primary btn-xl">
+            Commencer
+          </Link>
         </div>
       </div>
     </div>
