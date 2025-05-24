@@ -1,4 +1,5 @@
 import ConnexionButton from "./ConnexionButton";
+import DashboardButton from "./DashboardButton";
 import Link from "next/link";
 
 function Header() {
@@ -11,7 +12,10 @@ function Header() {
           </Link>
         </div>
         <div className="flex-none">
-          <ul className="menu menu-horizontal px-1 font-semibold">
+          <ul className="menu menu-horizontal px-1 font-semibold flex gap-4">
+            <li>
+              <DashboardButton />
+            </li>
             <li>
               <ConnexionButton />
             </li>
