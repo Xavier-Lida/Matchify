@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ROUTES } from "@/constants";
 
 function Hero() {
   return (
@@ -11,7 +12,7 @@ function Hero() {
             <br />
             Pour suivre les matchs, les classements, les statistiques et faire vos prédictions!
           </p>
-          <Link href="/home" className="btn btn-primary btn-xl">
+          <Link href={ROUTES.HOMEPAGE} className="btn btn-primary btn-xl">
             Commencer
           </Link>
         </div>

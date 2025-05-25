@@ -1,11 +1,12 @@
 "use client";
-// New test to deploy
+
 import { signIn } from "next-auth/react";
+import { ROUTES } from "@/constants";
 
 export default function GoogleButton() {
   return (
     <button
-      onClick={() => signIn("google", { callbackUrl: "/home" })}
+      onClick={() => signIn("google", { callbackUrl: ROUTES.HOMEPAGE })}
       className="btn bg-white text-black border-[#e5e5e5] w-full"
     >
       <svg

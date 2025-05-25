@@ -1,5 +1,5 @@
 "use client";
-import { MY_EMAIL } from "@/constants";
+import { MY_EMAIL, ROUTES } from "@/constants";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 
@@ -11,7 +11,7 @@ export default function DashboardButton() {
   }
 
   return (
-    <Link href="/dashboard" className="btn btn-ghost">
+    <Link href={ROUTES.DASHBOARD} className="btn btn-ghost">
       Tableau de bord
     </Link>
   );

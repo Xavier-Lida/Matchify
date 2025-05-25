@@ -186,7 +186,7 @@ export default function HomePage() {
         data={filteredTeams}
       />
       <LeaderboardContainer
-        title="Stats des buteurs"
+        title="Classement des buteurs"
         subtitle="Saison en cours"
         filters={scorerFilters}
         onFilterChange={handleScorerFilterChange}
