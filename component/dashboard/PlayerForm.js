@@ -8,15 +8,27 @@ export default function PlayerForm({
 }) {
   return (
     <form onSubmit={onSubmit} className="space-y-4">
-      <input
-        type="text"
-        name="name"
-        placeholder="Nom du joueur"
-        value={form.name}
-        onChange={onChange}
-        className="input input-bordered w-full bg-gray-50"
-        required
-      />
+      <div className="flex gap-2">
+        <input
+          type="text"
+          name="firstName"
+          placeholder="Prénom"
+          value={form.firstName || ""}
+          onChange={onChange}
+          className="input input-bordered w-full bg-gray-50"
+          required
+        />
+        <input
+          type="text"
+          name="lastName"
+          placeholder="Nom"
+          value={form.lastName || ""}
+          onChange={onChange}
+          className="input input-bordered w-full bg-gray-50"
+          required
+        />
+      </div>
+
       <select
         name="teamId"
         value={form.teamId}

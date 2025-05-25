@@ -19,30 +19,29 @@ export default function useCrudManager(apiUrl, initialForm) {
 
   const handleAdd = async (e) => {
     e.preventDefault();
-    let cleanData = { ...form };
+    const cleanData = {
+      ...form,
+      name: `${form.firstName?.trim() || ""} ${form.lastName?.trim() || ""}`.trim(),
+    };
 
-    // Logique spécifique pour les équipes
+    // Supprime firstName et lastName
+    delete cleanData.firstName;
+    delete cleanData.lastName;
+
     if (apiUrl.includes("teams")) {
-      cleanData = {
-        ...form,
-        points: form.points === "" ? 0 : Number(form.points),
-        logo:
-          form.logo && form.logo.trim() !== ""
-            ? form.logo
-            : "https://placehold.co/60x60",
-      };
+      cleanData.points = form.points === "" ? 0 : Number(form.points);
+      cleanData.logo =
+        form.logo && form.logo.trim() !== ""
+          ? form.logo
+          : "https://placehold.co/60x60";
     }
 
-    // Logique spécifique pour les joueurs
     if (apiUrl.includes("players")) {
-      cleanData = {
-        ...form,
-        goals: form.goals === "" ? 0 : Number(form.goals),
-        photo:
-          form.photo && form.photo.trim() !== ""
-            ? form.photo
-            : "https://placehold.co/60x60",
-      };
+      cleanData.goals = form.goals === "" ? 0 : Number(form.goals);
+      cleanData.photo =
+        form.photo && form.photo.trim() !== ""
+          ? form.photo
+          : "https://placehold.co/60x60";
     }
 
     await fetch(apiUrl, {
@@ -66,28 +65,25 @@ export default function useCrudManager(apiUrl, initialForm) {
     if (e && e.preventDefault) e.preventDefault();
     const id = customId || editId;
     const rawData = customForm || form;
-    let cleanData = { ...rawData };
+    const cleanData = {
+      ...rawData,
+      name: `${rawData.firstName?.trim() || ""} ${rawData.lastName?.trim() || ""}`.trim(),
+    };
 
     if (apiUrl.includes("teams")) {
-      cleanData = {
-        ...rawData,
-        points: rawData.points === "" ? 0 : Number(rawData.points),
-        logo:
-          rawData.logo && rawData.logo.trim() !== ""
-            ? rawData.logo
-            : "https://placehold.co/60x60",
-      };
+      cleanData.points = rawData.points === "" ? 0 : Number(rawData.points);
+      cleanData.logo =
+        rawData.logo && rawData.logo.trim() !== ""
+          ? rawData.logo
+          : "https://placehold.co/60x60";
     }
 
     if (apiUrl.includes("players")) {
-      cleanData = {
-        ...rawData,
-        goals: rawData.goals === "" ? 0 : Number(rawData.goals),
-        photo:
-          rawData.photo && rawData.photo.trim() !== ""
-            ? rawData.photo
-            : "https://placehold.co/60x60",
-      };
+      cleanData.goals = rawData.goals === "" ? 0 : Number(rawData.goals);
+      cleanData.photo =
+        rawData.photo && rawData.photo.trim() !== ""
+          ? rawData.photo
+          : "https://placehold.co/60x60";
     }
 
     await fetch(apiUrl, {
@@ -107,15 +103,6 @@ export default function useCrudManager(apiUrl, initialForm) {
     fetch(apiUrl)
       .then((res) => res.json())
       .then(setItems);
-  };
-
-  const data = {
-    ...form,
-    goals: form.goals === "" ? 0 : Number(form.goals),
-    photo:
-      form.photo && form.photo.trim() !== ""
-        ? form.photo
-        : "https://placehold.co/60x60",
   };
 
   return {
