@@ -19,10 +19,36 @@ export default function useCrudManager(apiUrl, initialForm) {
 
   const handleAdd = async (e) => {
     e.preventDefault();
+    let cleanData = { ...form };
+
+    // Logique spécifique pour les équipes
+    if (apiUrl.includes("teams")) {
+      cleanData = {
+        ...form,
+        points: form.points === "" ? 0 : Number(form.points),
+        logo:
+          form.logo && form.logo.trim() !== ""
+            ? form.logo
+            : "https://placehold.co/60x60",
+      };
+    }
+
+    // Logique spécifique pour les joueurs
+    if (apiUrl.includes("players")) {
+      cleanData = {
+        ...form,
+        goals: form.goals === "" ? 0 : Number(form.goals),
+        photo:
+          form.photo && form.photo.trim() !== ""
+            ? form.photo
+            : "https://placehold.co/60x60",
+      };
+    }
+
     await fetch(apiUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
+      body: JSON.stringify(cleanData),
     });
     fetch(apiUrl)
       .then((res) => res.json())
@@ -39,11 +65,35 @@ export default function useCrudManager(apiUrl, initialForm) {
   const handleSave = async (e, customId, customForm) => {
     if (e && e.preventDefault) e.preventDefault();
     const id = customId || editId;
-    const data = customForm || form;
+    const rawData = customForm || form;
+    let cleanData = { ...rawData };
+
+    if (apiUrl.includes("teams")) {
+      cleanData = {
+        ...rawData,
+        points: rawData.points === "" ? 0 : Number(rawData.points),
+        logo:
+          rawData.logo && rawData.logo.trim() !== ""
+            ? rawData.logo
+            : "https://placehold.co/60x60",
+      };
+    }
+
+    if (apiUrl.includes("players")) {
+      cleanData = {
+        ...rawData,
+        goals: rawData.goals === "" ? 0 : Number(rawData.goals),
+        photo:
+          rawData.photo && rawData.photo.trim() !== ""
+            ? rawData.photo
+            : "https://placehold.co/60x60",
+      };
+    }
+
     await fetch(apiUrl, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...data, _id: id }),
+      body: JSON.stringify({ ...cleanData, _id: id }),
     });
     fetch(apiUrl)
       .then((res) => res.json())
@@ -57,6 +107,15 @@ export default function useCrudManager(apiUrl, initialForm) {
     fetch(apiUrl)
       .then((res) => res.json())
       .then(setItems);
+  };
+
+  const data = {
+    ...form,
+    goals: form.goals === "" ? 0 : Number(form.goals),
+    photo:
+      form.photo && form.photo.trim() !== ""
+        ? form.photo
+        : "https://placehold.co/60x60",
   };
 
   return {

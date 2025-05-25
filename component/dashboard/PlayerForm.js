@@ -44,7 +44,7 @@ export default function PlayerForm({
         type="text"
         name="photo"
         placeholder="URL photo de profil"
-        value={form.photo}
+        value={form.photo === "" ? "https://placehold.co/60x60" : form.photo}
         onChange={onChange}
         className="input input-bordered w-full bg-gray-50"
       />

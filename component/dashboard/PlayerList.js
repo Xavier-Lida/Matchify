@@ -36,8 +36,8 @@ export default function PlayerList({ players, teams, onEdit, onDelete }) {
   };
 
   return (
-    <div className="max-h-80 overflow-y-auto border border-gray-300 rounded-lg bg-gray-50 shadow-sm">
-      <ul>
+    <div className="mt-8 min-h-[300px]">
+      <ul className="flex flex-col gap-2">
         {players.map((player) =>
           editPlayerId === player._id ? (
             <li
@@ -56,10 +56,14 @@ export default function PlayerList({ players, teams, onEdit, onDelete }) {
           ) : (
             <li
               key={player._id}
-              className="flex items-center gap-2 px-3 py-2 border-b last:border-b-0"
+              className="flex items-center gap-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm px-3 py-3 border-b last:border-b-0"
             >
               <img
-                src={player.photo}
+                src={
+                  player.photo && player.photo.trim() !== ""
+                    ? player.photo
+                    : "https://placehold.co/60x60"
+                }
                 alt={player.name}
                 className="w-8 h-8 rounded-full"
               />
