@@ -4,7 +4,6 @@ import ConnexionButton from "./ConnexionButton";
 import DashboardButton from "./DashboardButton";
 import NavigationButton from "./NavigationButton";
 import { ROUTES } from "@/constants";
-import Link from "next/link";
 import { useSession } from "next-auth/react";
 
 function Header() {
@@ -37,15 +36,16 @@ function Header() {
               className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
             >
               <li>
-                <NavigationButton route={ROUTES.HOMEPAGE} name="Accueuil" />
+                <NavigationButton route={ROUTES.HOMEPAGE} name="Accueil" />
               </li>
               <li>
                 <NavigationButton route={ROUTES.SCHEDULE} name="Horaire" />
               </li>
               <li>
-                <Link href={ROUTES.LEADERBOARD} className="btn btn-ghost">
-                  Classement
-                </Link>
+                <NavigationButton
+                  route={ROUTES.LEADERBOARD}
+                  name="Classement"
+                />
               </li>
               <li>
                 <DashboardButton />
@@ -53,33 +53,42 @@ function Header() {
               <li>
                 <ConnexionButton />
               </li>
-              {/* Ajoute d'autres liens ici si besoin */}
             </ul>
           </div>
-          {/* Logo ou titre (non cliquable, hover opacity) */}
-          <span className="ml-2 text-xl font-bold transition-opacity opacity-90 hover:opacity-60 select-none cursor-default">
+          {/* Logo ou titre */}
+          <span className="pl-2 text-3xl font-bold text-neutral transition-all hover:text-4xl select-none cursor-default">
             Matchify
           </span>
         </div>
         {/* Les boutons passent à droite sur desktop */}
         <div className="navbar-end hidden lg:flex">
-          <ul className="menu menu-horizontal px-1 font-semibold flex gap-4">
+          <ul className="menu menu-horizontal px-1 font-semibold flex gap-4 items-center">
             <li>
-              <NavigationButton route={ROUTES.HOMEPAGE} name="Accueuil" />
+              <NavigationButton route={ROUTES.HOMEPAGE} name="Accueil" />
             </li>
-            <li>
-              <NavigationButton route={ROUTES.SCHEDULE} name="Horaire" />
-            </li>
-            <li>
-              <NavigationButton route={ROUTES.LEADERBOARD} name="Classement" />
-            </li>
-            <li>
-              <DashboardButton />
+            {/* Dropdown menu */}
+            <li tabIndex={0} className="relative dropdown dropdown-start">
+              <details>
+                <summary className="btn btn-ghost">Menu</summary>
+                <ul className="dropdown-content shadow menu bg-base-100 rounded-box w-40 z-50">
+                  <li>
+                    <NavigationButton route={ROUTES.SCHEDULE} name="Horaire" />
+                  </li>
+                  <li>
+                    <NavigationButton
+                      route={ROUTES.LEADERBOARD}
+                      name="Classement"
+                    />
+                  </li>
+                  <li>
+                    <DashboardButton />
+                  </li>
+                </ul>
+              </details>
             </li>
             <li>
               <ConnexionButton />
             </li>
-            {/* Ajoute d'autres liens ici si besoin */}
           </ul>
         </div>
       </div>
