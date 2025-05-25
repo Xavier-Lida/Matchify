@@ -1,5 +1,5 @@
 import Footer from "@/component/Footer.js";
-import Header from "@/component/Header.js";
+import Header from "@/component/navigation/Header.js";
 import { SessionProvider } from "next-auth/react";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";

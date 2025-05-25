@@ -1,4 +1,5 @@
 "use client";
+import NavigationButton from "./NavigationButton";
 import { MY_EMAIL, ROUTES } from "@/constants";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
@@ -10,9 +11,5 @@ export default function DashboardButton() {
     return null;
   }
 
-  return (
-    <Link href={ROUTES.DASHBOARD} className="btn btn-ghost">
-      Tableau de bord
-    </Link>
-  );
+  return <NavigationButton route={ROUTES.DASHBOARD} name="Tableau de bord" />;
 }

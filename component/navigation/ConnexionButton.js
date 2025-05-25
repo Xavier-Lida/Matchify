@@ -1,5 +1,5 @@
 "use client";
-
+import NavigationButton from "./NavigationButton";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 
@@ -13,9 +13,7 @@ function ConnexionButton() {
       Déconnexion
     </button>
   ) : (
-    <Link href="/login" className="btn btn-ghost">
-      Connexion
-    </Link>
+    <NavigationButton route="/login" name="Connexion" />
   );
 }
 
