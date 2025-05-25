@@ -1,8 +1,6 @@
 import { MY_EMAIL } from "@/constants";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import Dashboard from "@/component/dashboard/Dashboard";
-import Sidebar from "@/component/dashboard/Sidebar";
 import TeamManager from "@/component/dashboard/TeamManager";
 
 export default async function DashboardPage() {
@@ -14,7 +12,6 @@ export default async function DashboardPage() {
 
   return (
     <div className="flex items-center justify-center min-h-screen">
-      <Sidebar />
       <TeamManager />
     </div>
   );

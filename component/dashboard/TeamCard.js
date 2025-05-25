@@ -1,6 +1,6 @@
 export default function TeamCard({ team, onEdit, onDelete }) {
   return (
-    <div className="card bg-base-100 shadow-md p-4 flex flex-col">
+    <div className="card bg-gray-50 shadow-md p-4 flex flex-col">
       <div className="flex items-center gap-4 mb-4">
         <img
           src={team.logo}
