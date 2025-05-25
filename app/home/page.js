@@ -23,13 +23,14 @@ export default function HomePage() {
   const [teamFilters, setTeamFilters] = useState(initialTeamFilters);
   const [scorerFilters, setScorerFilters] = useState(initialScorerFilters);
   const [teams, setTeams] = useState([]);
-  const [scorers, setScorers] = useState([]); // À remplir plus tard
+  const [scorers, setScorers] = useState([]);
 
+  // Charger équipes et buteurs
   useEffect(() => {
     fetch("/api/teams")
       .then((res) => res.json())
-      .then((data) => {
-        const divisions = Array.from(new Set(data.map((team) => team.division))).filter(Boolean);
+      .then((teamsData) => {
+        const divisions = Array.from(new Set(teamsData.map((team) => team.division))).filter(Boolean);
         setTeamFilters((prev) =>
           prev.map((filter) =>
             filter.name === "division"
@@ -64,10 +65,39 @@ export default function HomePage() {
               : filter
           )
         );
-        setTeams(data);
+        setTeams(teamsData);
+
+        // Charger les buteurs après avoir les équipes (pour le mapping)
+        fetch("/api/players/scorers")
+          .then((res) => res.json())
+          .then((players) => {
+            const teamMap = Object.fromEntries(teamsData.map((t) => [t._id, t.name]));
+            const filtered = players
+              .filter((p) =>
+                !scorerFilters[0].value
+                  ? true
+                  : teamsData.find(
+                      (t) =>
+                        t._id === p.teamId &&
+                        t.division === scorerFilters[0].value
+                    )
+              )
+              .sort((a, b) => b.goals - a.goals)
+              .map((player, idx) => ({
+                ranking: idx + 1,
+                name: player.name,
+                team: teamMap[player.teamId] || "-",
+                gamesPlayed: player.gamesPlayed ?? "-",
+                goals: player.goals,
+                assists: player.assists ?? "-",
+                points: player.points ?? "-",
+              }));
+            setScorers(filtered);
+          });
       });
   }, []);
 
+  // Filtrage dynamique des équipes
   const filteredTeams = teams
     .filter((team) =>
       !teamFilters[0].value ? true : team.division === teamFilters[0].value
@@ -84,16 +114,41 @@ export default function HomePage() {
       points: team.points,
     }));
 
-  const handleTeamFilterChange = (name, value) => {
-    setTeamFilters((prev) =>
+  // Filtrage dynamique des buteurs
+  const handleScorerFilterChange = (name, value) => {
+    setScorerFilters((prev) =>
       prev.map((filter) =>
         filter.name === name ? { ...filter, value } : filter
       )
     );
+    fetch("/api/players/scorers")
+      .then((res) => res.json())
+      .then((players) => {
+        const teamMap = Object.fromEntries(teams.map((t) => [t._id, t.name]));
+        const filtered = players
+          .filter((p) =>
+            !value
+              ? true
+              : teams.find(
+                  (t) => t._id === p.teamId && t.division === value
+                )
+          )
+          .sort((a, b) => b.goals - a.goals)
+          .map((player, idx) => ({
+            ranking: idx + 1,
+            name: player.name,
+            team: teamMap[player.teamId] || "-",
+            gamesPlayed: player.gamesPlayed ?? "-",
+            goals: player.goals,
+            assists: player.assists ?? "-",
+            points: player.points ?? "-",
+          }));
+        setScorers(filtered);
+      });
   };
 
-  const handleScorerFilterChange = (name, value) => {
-    setScorerFilters((prev) =>
+  const handleTeamFilterChange = (name, value) => {
+    setTeamFilters((prev) =>
       prev.map((filter) =>
         filter.name === name ? { ...filter, value } : filter
       )
@@ -121,7 +176,7 @@ export default function HomePage() {
   ];
 
   return (
-    <main className="pt-20 px-4 w-full min-h-screen flex flex-col items-center justify-start">
+    <main className="pt-20 px-4 mb-15 w-full min-h-screen flex flex-col items-center justify-start">
       <LeaderboardContainer
         title="Classement des équipes"
         subtitle="Saison en cours"
