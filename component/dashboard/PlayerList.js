@@ -58,7 +58,7 @@ export default function PlayerList({ players, teams, onEdit, onDelete }) {
               key={player._id}
               className="flex items-center gap-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm px-3 py-3 border-b last:border-b-0"
             >
-              <img
+              {/* <img
                 src={
                   player.photo && player.photo.trim() !== ""
                     ? player.photo
@@ -66,7 +66,7 @@ export default function PlayerList({ players, teams, onEdit, onDelete }) {
                 }
                 alt={player.name}
                 className="w-8 h-8 rounded-full"
-              />
+              /> */}
               <span className="font-medium">{player.name}</span>
               <span className="text-gray-500 text-sm">
                 —{" "}
