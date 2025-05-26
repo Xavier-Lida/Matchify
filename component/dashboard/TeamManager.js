@@ -3,6 +3,7 @@ import TeamCard from "./TeamCard";
 import TeamForm from "./TeamForm";
 import PlayerForm from "./PlayerForm";
 import { useState, useEffect } from "react";
+import { cleanPlayers, sendPlayersToDb } from "@/utils/importPlayers";
 
 export default function TeamManager({ team: initialTeam, onTeamDeleted }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -36,7 +37,18 @@ export default function TeamManager({ team: initialTeam, onTeamDeleted }) {
 
   // Save players changes
   const handleSavePlayers = async (players) => {
-    const updatedTeam = { ...team, players };
+    // Pass team._id to cleanPlayers
+    const cleanedPlayers = cleanPlayers(players, team._id);
+
+    try {
+      await sendPlayersToDb(cleanedPlayers);
+    } catch (err) {
+      // Handle error (show notification, etc.)
+      console.error("Erreur lors de l'import des joueurs :", err);
+    }
+
+    // Update the team with the cleaned players and save team
+    const updatedTeam = { ...team, players: cleanedPlayers };
     setTeam(updatedTeam);
     await fetch(`/api/teams`, {
       method: "PUT",

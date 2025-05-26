@@ -13,8 +13,16 @@ export async function POST(request) {
   const client = await clientPromise;
   const db = client.db();
   const data = await request.json();
-  const result = await db.collection("players").insertOne(data);
-  return NextResponse.json(result);
+
+  if (Array.isArray(data.players)) {
+    // Bulk insert
+    const result = await db.collection("players").insertMany(data.players);
+    return NextResponse.json({ insertedCount: result.insertedCount });
+  } else {
+    // Single insert (fallback)
+    const result = await db.collection("players").insertOne(data);
+    return NextResponse.json(result);
+  }
 }
 
 export async function DELETE(request) {
