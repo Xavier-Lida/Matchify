@@ -2,17 +2,59 @@
 import { useEffect, useState } from "react";
 import TeamManager from "./TeamManager";
 import Sidebar from "./Sidebar";
+import TeamForm from "./TeamForm";
 
 export default function Dashboard() {
   const [teams, setTeams] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [showAdd, setShowAdd] = useState(false);
+  const [newTeam, setNewTeam] = useState({
+    name: "",
+    division: "",
+    points: 0,
+    logo: "",
+    players: [],
+  });
 
-  // Fetch teams from your API or TeamManager (example with fetch)
+  // Fetch teams from your API
   useEffect(() => {
     fetch("/api/teams")
       .then((res) => res.json())
       .then((data) => setTeams(data));
   }, []);
+
+  const handleAddTeam = async (e) => {
+    e.preventDefault();
+    await fetch("/api/teams", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newTeam),
+    });
+    // Refresh teams list
+    const updated = await fetch("/api/teams").then((res) => res.json());
+    setTeams(updated);
+    setShowAdd(false);
+    setNewTeam({
+      name: "",
+      division: "",
+      points: 0,
+      logo: "",
+      players: [],
+    });
+    setCurrentIndex(updated.length - 1); // Select the new team
+  };
+
+  // Handle team deletion from TeamManager
+  const handleTeamDeleted = (deletedId) => {
+    const updatedTeams = teams.filter((t) => t._id !== deletedId);
+    setTeams(updatedTeams);
+    // Adjust currentIndex if needed
+    if (updatedTeams.length === 0) {
+      setCurrentIndex(0);
+    } else if (currentIndex >= updatedTeams.length) {
+      setCurrentIndex(updatedTeams.length - 1);
+    }
+  };
 
   const currentTeam = teams[currentIndex];
 
@@ -31,13 +73,24 @@ export default function Dashboard() {
           const idx = teams.findIndex((t) => t._id === teamId);
           if (idx !== -1) setCurrentIndex(idx);
         }}
+        onAddTeam={() => setShowAdd(true)}
       />
       <main className="flex-1 flex flex-col items-center justify-center">
-        {currentTeam ? (
-          <TeamManager team={currentTeam} />
-        ) : (
-          <div>Aucune équipe</div>
+        {showAdd && (
+          <TeamForm
+            form={newTeam}
+            onChange={(e) =>
+              setNewTeam({ ...newTeam, [e.target.name]: e.target.value })
+            }
+            onSubmit={handleAddTeam}
+            onCancel={() => setShowAdd(false)}
+            submitLabel="Créer"
+          />
         )}
+        {currentTeam && !showAdd ? (
+          <TeamManager team={currentTeam} onTeamDeleted={handleTeamDeleted} />
+        ) : null}
+        {!currentTeam && !showAdd ? <div>Aucune équipe</div> : null}
       </main>
     </div>
   );
