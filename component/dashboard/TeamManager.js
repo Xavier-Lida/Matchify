@@ -2,6 +2,7 @@
 import TeamCard from "./TeamCard";
 import TeamForm from "./TeamForm";
 import PlayerForm from "./PlayerForm";
+import PlayerList from "./PlayerList";
 import { useState, useEffect } from "react";
 import { cleanPlayers, sendPlayersToDb } from "@/utils/importPlayers";
 
@@ -98,6 +99,8 @@ export default function TeamManager({ team: initialTeam, onTeamDeleted }) {
           </button>
         }
       />
+      <PlayerList 
+        players={players} />
       {showPlayers && (
         <PlayerForm
           players={players}
