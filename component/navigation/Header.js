@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import ConnexionButton from "./ConnexionButton";
-import DashboardButton from "./DashboardButton";
 import NavigationButton from "./NavigationButton";
 import Dropdown from "./Dropdown";
 import { ROUTES } from "@/constants";
@@ -11,13 +10,6 @@ import Hamburger from "./Hamburger";
 
 function Header() {
   const { data: session } = useSession();
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-
-  // Helper to close dropdown and (optionally) do something else
-  const handleMenuClick = (callback) => () => {
-    setDropdownOpen(false);
-    if (callback) callback();
-  };
 
   return (
     <nav className="navbar bg-base-100 shadow-sm fixed z-50 w-full flex justify-center">
