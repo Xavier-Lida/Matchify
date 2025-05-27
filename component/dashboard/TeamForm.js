@@ -41,7 +41,7 @@ export default function TeamForm({
           value={form.points}
           onChange={onChange}
           className="input input-bordered w-full"
-          min={0}
+          min={-5}
         />
       </div>
       <div className="mb-4">
@@ -57,11 +57,7 @@ export default function TeamForm({
         <button className="btn btn-primary" type="submit">
           {submitLabel}
         </button>
-        <button
-          className="btn btn-ghost"
-          type="button"
-          onClick={onCancel}
-        >
+        <button className="btn btn-ghost" type="button" onClick={onCancel}>
           Annuler
         </button>
       </div>

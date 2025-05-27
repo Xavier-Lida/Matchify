@@ -8,6 +8,7 @@ function PlayerRow({
   handleInputBlur,
   handleInputKeyDown,
   handleRemovePlayer,
+  handleResetPlayer,
   inputRef,
   minRows,
   totalRows,
@@ -69,9 +70,17 @@ function PlayerRow({
           </td>
         );
       })}
-      <td className="py-2 px-4">
+      <td className="flex gap-3 justify-end py-2 px-4">
         <button
-          className="btn btn-error btn-xs"
+          className="btn btn-warning btn-xs"
+          type="button"
+          onClick={() => handleResetPlayer(rowIdx, row)}
+          title="Réinitialiser ce joueur"
+        >
+          &#8635; {/* Unicode for looping arrow */}
+        </button>
+        <button
+          className="btn btn-error btn-xs px-2.5"
           type="button"
           onClick={() => handleRemovePlayer(rowIdx)}
           disabled={totalRows <= minRows}

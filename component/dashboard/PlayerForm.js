@@ -61,6 +61,19 @@ export default function PlayerForm({ players = [], onSave, onClose }) {
     );
   };
 
+  const handleResetPlayer = async (idx, row) => {
+    // If the player has an _id, delete from DB
+    if (row._id) {
+      await fetch(`/api/players?id=${row._id}`, { method: "DELETE" });
+    }
+    // Empty the fields of the current row (but keep the row)
+    setRows((prev) =>
+      prev.map((r, i) =>
+        i === idx ? { firstName: "", lastName: "", number: "" } : r
+      )
+    );
+  };
+
   const handleSave = () => {
     if (onSave) {
       // Only send rows with at least a first or last name or number
@@ -139,6 +152,7 @@ export default function PlayerForm({ players = [], onSave, onClose }) {
                   handleInputBlur={handleInputBlur}
                   handleInputKeyDown={handleInputKeyDown}
                   handleRemovePlayer={handleRemovePlayer}
+                  handleResetPlayer={handleResetPlayer}
                   inputRef={inputRef}
                   minRows={10}
                   totalRows={rows.length}
@@ -153,7 +167,7 @@ export default function PlayerForm({ players = [], onSave, onClose }) {
             onClick={handleAddPlayer}
             type="button"
           >
-            Ajouter joueur
+            Ajouter ligne
           </button>
           <button
             className="btn btn-primary btn-sm"
