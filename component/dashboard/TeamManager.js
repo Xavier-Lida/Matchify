@@ -9,11 +9,21 @@ export default function TeamManager({ team: initialTeam, onTeamDeleted }) {
   const [isEditing, setIsEditing] = useState(false);
   const [showPlayers, setShowPlayers] = useState(false);
   const [team, setTeam] = useState(initialTeam);
+  const [players, setPlayers] = useState([]);
 
   // Sync local team state with prop changes
   useEffect(() => {
     setTeam(initialTeam);
   }, [initialTeam]);
+
+  // Fetch players when showPlayers is true and team._id is available
+  useEffect(() => {
+    if (team._id) {
+      fetch(`/api/players?teamId=${team._id}`)
+        .then((res) => res.json())
+        .then((data) => setPlayers(data));
+    }
+  }, [showPlayers, team._id]);
 
   // Handle form input changes
   const handleChange = (e) => {
@@ -37,17 +47,14 @@ export default function TeamManager({ team: initialTeam, onTeamDeleted }) {
 
   // Save players changes
   const handleSavePlayers = async (players) => {
-    // Pass team._id to cleanPlayers
     const cleanedPlayers = cleanPlayers(players, team._id);
 
     try {
-      await sendPlayersToDb(cleanedPlayers);
+      await sendPlayersToDb(cleanedPlayers, team._id); // Pass team._id here!
     } catch (err) {
-      // Handle error (show notification, etc.)
       console.error("Erreur lors de l'import des joueurs :", err);
     }
 
-    // Update the team with the cleaned players and save team
     const updatedTeam = { ...team, players: cleanedPlayers };
     setTeam(updatedTeam);
     await fetch(`/api/teams`, {
@@ -93,7 +100,7 @@ export default function TeamManager({ team: initialTeam, onTeamDeleted }) {
       />
       {showPlayers && (
         <PlayerForm
-          players={team.players || []}
+          players={players}
           onSave={handleSavePlayers}
           onClose={() => setShowPlayers(false)}
         />

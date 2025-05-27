@@ -2,10 +2,13 @@ import { NextResponse } from "next/server";
 import clientPromise from "@/libs/mongo";
 import { ObjectId } from "mongodb";
 
-export async function GET() {
+export async function GET(request) {
   const client = await clientPromise;
   const db = client.db();
-  const players = await db.collection("players").find({}).toArray();
+  const { searchParams } = new URL(request.url);
+  const teamId = searchParams.get("teamId");
+  const filter = teamId ? { teamId } : {};
+  const players = await db.collection("players").find(filter).toArray();
   return NextResponse.json(players);
 }
 

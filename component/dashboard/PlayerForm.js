@@ -5,6 +5,7 @@
  */
 
 import { useState, useRef, useEffect } from "react";
+import PlayerRow from "./PlayerRow";
 
 export default function PlayerForm({ players = [], onSave, onClose }) {
   // Always keep at least 10 rows
@@ -32,10 +33,6 @@ export default function PlayerForm({ players = [], onSave, onClose }) {
       });
     }
   }, [rows.length]);
-
-  const handleCellClick = (rowIdx, col) => {
-    setEditing({ row: rowIdx, col });
-  };
 
   const handleInputChange = (rowIdx, col, value) => {
     setRows((prev) =>
@@ -131,55 +128,21 @@ export default function PlayerForm({ players = [], onSave, onClose }) {
             </thead>
             <tbody>
               {rows.map((row, rowIdx) => (
-                <tr
+                <PlayerRow
                   key={rowIdx}
-                  className={
-                    rowIdx % 2 === 0
-                      ? "bg-white hover:bg-gray-50"
-                      : "bg-gray-50 hover:bg-gray-100"
-                  }
-                  style={{ height: "2.5rem" }}
-                >
-                  {columns.map((col) => (
-                    <td
-                      key={col.key}
-                      className="py-2 px-4 cursor-pointer rounded transition"
-                      style={{ minWidth: 0, width: "1%" }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setEditing({ row: rowIdx, col: col.key });
-                      }}
-                    >
-                      {editing.row === rowIdx && editing.col === col.key ? (
-                        <input
-                          ref={inputRef}
-                          type={col.key === "number" ? "number" : "text"}
-                          className="input input-xs input-bordered w-full bg-transparent focus:bg-transparent shadow-none border border-gray-300 py-1 px-2 min-h-6"
-                          value={row[col.key] || ""}
-                          onChange={(e) =>
-                            handleInputChange(rowIdx, col.key, e.target.value)
-                          }
-                          onBlur={handleInputBlur}
-                          onKeyDown={handleInputKeyDown}
-                          autoFocus
-                        />
-                      ) : (
-                        <span className="block w-full">{row[col.key]}</span>
-                      )}
-                    </td>
-                  ))}
-                  <td className="py-2 px-4">
-                    <button
-                      className="btn btn-error btn-xs"
-                      type="button"
-                      onClick={() => handleRemovePlayer(rowIdx)}
-                      disabled={rows.length <= 10}
-                      title="Supprimer ce joueur"
-                    >
-                      -
-                    </button>
-                  </td>
-                </tr>
+                  row={row}
+                  rowIdx={rowIdx}
+                  columns={columns}
+                  editing={editing}
+                  setEditing={setEditing}
+                  handleInputChange={handleInputChange}
+                  handleInputBlur={handleInputBlur}
+                  handleInputKeyDown={handleInputKeyDown}
+                  handleRemovePlayer={handleRemovePlayer}
+                  inputRef={inputRef}
+                  minRows={10}
+                  totalRows={rows.length}
+                />
               ))}
             </tbody>
           </table>
