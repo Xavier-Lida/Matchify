@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import TeamManager from "./TeamManager";
 import Sidebar from "./Sidebar";
 import TeamForm from "./TeamForm";
+import { getTeams, postTeam } from "@/utils/api";
 
 export default function Dashboard() {
   const teamProps = {
@@ -26,20 +27,14 @@ export default function Dashboard() {
 
   // Fetch teams from your API
   useEffect(() => {
-    fetch("/api/teams")
-      .then((res) => res.json())
-      .then((data) => setTeams(data));
+    getTeams().then((data) => setTeams(data));
   }, []);
 
   const handleAddTeam = async (e) => {
     e.preventDefault();
-    await fetch("/api/teams", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newTeam),
-    });
+    await postTeam(newTeam);
     // Refresh teams list
-    const updated = await fetch("/api/teams").then((res) => res.json());
+    const updated = await getTeams()
     setTeams(updated);
     setShowAdd(false);
     setNewTeam(teamProps);
