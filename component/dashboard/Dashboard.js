@@ -5,16 +5,24 @@ import Sidebar from "./Sidebar";
 import TeamForm from "./TeamForm";
 
 export default function Dashboard() {
-  const [teams, setTeams] = useState([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [showAdd, setShowAdd] = useState(false);
-  const [newTeam, setNewTeam] = useState({
+  const teamProps = {
     name: "",
     division: "",
     points: 0,
-    logo: "",
     players: [],
-  });
+    gamesPlayed: 0,
+    wins: 0,
+    losses: 0,
+    draws: 0,
+    goalsFor: 0,
+    goalsAgainst: 0,
+    goalDifference: 0,
+    logo: "",
+  };
+  const [teams, setTeams] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [showAdd, setShowAdd] = useState(false);
+  const [newTeam, setNewTeam] = useState(teamProps);
 
   // Fetch teams from your API
   useEffect(() => {
@@ -34,13 +42,7 @@ export default function Dashboard() {
     const updated = await fetch("/api/teams").then((res) => res.json());
     setTeams(updated);
     setShowAdd(false);
-    setNewTeam({
-      name: "",
-      division: "",
-      points: 0,
-      logo: "",
-      players: [],
-    });
+    setNewTeam(teamProps);
     setCurrentIndex(updated.length - 1); // Select the new team
   };
 

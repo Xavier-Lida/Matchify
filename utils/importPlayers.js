@@ -47,7 +47,6 @@ export async function sendPlayersToDb(players, teamId) {
   // Fetch existing players for this team
   const existingRes = await fetch(`/api/players?teamId=${teamId}`);
   const existingPlayers = await existingRes.json();
-  console.log(existingRes);
 
   // Use number as unique identifier (adjust if needed)
   const existingNumbers = new Set(existingPlayers.map((p) => p.number));
@@ -71,7 +70,6 @@ export async function sendPlayersToDb(players, teamId) {
 
   // Insert new players
   if (newPlayers.length > 0) {
-    console.log(newPlayers);
     const res = await fetch("/api/players", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -84,7 +82,6 @@ export async function sendPlayersToDb(players, teamId) {
 
   // Update only changed players
   for (const player of updatedPlayers) {
-    console.log(updatedPlayers);
     const res = await fetch("/api/players", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
