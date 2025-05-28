@@ -4,7 +4,7 @@ import TeamForm from "./TeamForm";
 import PlayerForm from "./PlayerForm";
 import PlayerList from "./PlayerList";
 import { useState, useEffect } from "react";
-import { cleanPlayers, sendPlayersToDb } from "@/utils/importPlayers";
+import { cleanPlayers, sendPlayersToDb } from "@/utils/exportPlayers";
 import { getPlayersByTeamId, updateTeam, deleteTeam } from "@/utils/api";
 
 export default function TeamManager({ team: initialTeam, onTeamDeleted }) {
