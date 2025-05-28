@@ -33,6 +33,13 @@ export default function Sidebar({
         ))}
       </ul>
       <button
+        className="btn btn-success mt-4 mb-3"
+        style={{ marginTop: "auto" }}
+        onClick={onAddTeam}
+      >
+        Entrer un match
+      </button>
+      <button
         className="btn btn-primary mt-4"
         style={{ marginTop: "auto" }}
         onClick={onAddTeam}
