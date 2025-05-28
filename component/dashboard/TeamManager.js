@@ -5,6 +5,7 @@ import PlayerForm from "./PlayerForm";
 import PlayerList from "./PlayerList";
 import { useState, useEffect } from "react";
 import { cleanPlayers, sendPlayersToDb } from "@/utils/importPlayers";
+import { getPlayersByTeamId, updateTeam, deleteTeam } from "@/utils/api";
 
 export default function TeamManager({ team: initialTeam, onTeamDeleted }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -17,12 +18,14 @@ export default function TeamManager({ team: initialTeam, onTeamDeleted }) {
     setTeam(initialTeam);
   }, [initialTeam]);
 
-  // Fetch players when showPlayers is true and team._id is available
+  // Fetch players when team._id is available
   useEffect(() => {
     if (team._id) {
-      fetch(`/api/players?teamId=${team._id}`)
-        .then((res) => res.json())
-        .then((data) => setPlayers(data));
+      async function fetchPlayers() {
+        const players = await getPlayersByTeamId(team._id);
+        setPlayers(players);
+      }
+      fetchPlayers();
     }
   }, [showPlayers, team._id]);
 
@@ -38,11 +41,7 @@ export default function TeamManager({ team: initialTeam, onTeamDeleted }) {
   // Save team changes to backend
   const handleSave = async (e) => {
     if (e && e.preventDefault) e.preventDefault();
-    await fetch(`/api/teams`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(team),
-    });
+    await updateTeam(team);
     setIsEditing(false);
   };
 
@@ -50,25 +49,17 @@ export default function TeamManager({ team: initialTeam, onTeamDeleted }) {
   const handleSavePlayers = async (players) => {
     const cleanedPlayers = cleanPlayers(players, team._id);
 
-    try {
-      await sendPlayersToDb(cleanedPlayers, team._id); // Pass team._id here!
-    } catch (err) {
-      console.error("Erreur lors de l'import des joueurs :", err);
-    }
+    await sendPlayersToDb(cleanedPlayers, team._id);
 
     const updatedTeam = { ...team, players: cleanedPlayers };
     setTeam(updatedTeam);
-    await fetch(`/api/teams`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updatedTeam),
-    });
+    await updateTeam(updatedTeam);
     setShowPlayers(false);
   };
 
   // Delete team and notify parent
   const handleDelete = async (teamId) => {
-    await fetch(`/api/teams?id=${teamId}`, { method: "DELETE" });
+    await deleteTeam(teamId);
     if (onTeamDeleted) onTeamDeleted(teamId);
   };
 
@@ -99,8 +90,7 @@ export default function TeamManager({ team: initialTeam, onTeamDeleted }) {
           </button>
         }
       />
-      <PlayerList 
-        players={players} />
+      <PlayerList players={players} />
       {showPlayers && (
         <PlayerForm
           players={players}
