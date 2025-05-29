@@ -1,4 +1,4 @@
-export default function ClassementTable({ data = [], columns = [] }) {
+export default function leaderboardTable({ data = [], columns = [] }) {
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full border border-gray-200 rounded-lg">

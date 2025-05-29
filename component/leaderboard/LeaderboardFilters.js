@@ -1,4 +1,4 @@
-export default function ClassementFilters({ filters = [], onFilterChange }) {
+export default function LeaderboardFilters({ filters = [], onFilterChange }) {
   return (
     <div className="flex gap-3">
       {filters.map((filter) => (

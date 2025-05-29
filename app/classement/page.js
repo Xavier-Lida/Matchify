@@ -111,6 +111,9 @@ export default function HomePage() {
       wins: team.wins ?? "-",
       draws: team.draws ?? "-",
       losses: team.losses ?? "-",
+      goalsFor: team.goalsFor ?? "-",
+      goalsAgainst: team.goalsAgainst ?? "-",
+      goalDifference: team.goalDifference ?? "-",
       points: team.points,
     }));
 
@@ -141,7 +144,7 @@ export default function HomePage() {
             gamesPlayed: player.gamesPlayed ?? "-",
             goals: player.goals,
             assists: player.assists ?? "-",
-            points: player.points ?? "-",
+            points: player.goals + player.assists ?? "-",
           }));
         setScorers(filtered);
       });
@@ -162,6 +165,9 @@ export default function HomePage() {
     { key: "wins", label: "V" },
     { key: "draws", label: "N" },
     { key: "losses", label: "D" },
+    { key: "goalsFor", label: "BP" },
+    { key: "goalsAgainst", label: "BC" },
+    { key: "goalDifference", label: "DB" },
     { key: "points", label: "PTS" },
   ];
 

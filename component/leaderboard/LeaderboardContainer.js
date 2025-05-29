@@ -1,5 +1,5 @@
-import ClassementFilters from "./ClassementFilters";
-import ClassementTable from "./ClassementTable";
+import LeaderboardFilters from "./LeaderboardFilters";
+import LeaderboardTable from "./LeaderboardTable";
 
 export default function LeaderboardContainer({
   title,
@@ -17,9 +17,9 @@ export default function LeaderboardContainer({
             <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
             {subtitle && <div className="text-gray-500 font-medium">{subtitle}</div>}
           </div>
-          <ClassementFilters filters={filters} onFilterChange={onFilterChange} />
+          <LeaderboardFilters filters={filters} onFilterChange={onFilterChange} />
         </div>
-        <ClassementTable data={data} columns={columns} />
+        <LeaderboardTable data={data} columns={columns} />
       </div>
     </section>
   );
