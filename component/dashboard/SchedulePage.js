@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { generateSchedule } from "@/utils/generateSchedule";
+import { exportSchedule } from "@/utils/exportSchedule";
 
 async function getTeams() {
   try {
@@ -32,6 +33,7 @@ export default function SchedulePage() {
 
         const teamNames = teamData.map((team) => team.name); // ou un autre identifiant
         const generated = generateSchedule(teamNames, true);
+        await exportSchedule(generated);
         setSchedule(generated);
       } catch (error) {
         console.error("Error generating schedule:", error);

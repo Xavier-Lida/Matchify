@@ -21,9 +21,14 @@ export function generateSchedule(teams, isHomeAndAway = false) {
       if (home !== "BYE" && away !== "BYE") {
         roundMatches.push({
           day: round + 1,
+          location: "",
+          time: "",
+          date: "",
           teamA: home,
           teamB: away,
           status: "scheduled",
+          scoreA: null,
+          scoreB: null,
         });
       }
     }
