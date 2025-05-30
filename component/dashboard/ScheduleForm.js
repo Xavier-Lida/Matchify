@@ -9,34 +9,36 @@ export default function ScheduleForm({
       onSubmit={onSubmit}
     >
       <div className="mb-3">
-        <label className="block mb-1 font-medium">Nom</label>
+        <label className="block mb-1 font-medium">
+          Premier dimanche de la saison
+        </label>
         <input
-          name="name"
+          name="firstSunday"
+          type="date"
           className="input input-bordered w-full"
           required
         />
+        <p className="text-sm text-gray-500 mt-1">
+          Ce sera la date du premier jour de match (Jour 1).
+        </p>
       </div>
+
       <div className="mb-3">
-        <label className="block mb-1 font-medium">Division</label>
+        <label className="block mb-1 font-medium">
+          Heure de début des matchs
+        </label>
         <input
-          name="division"
-          type="number"
+          name="startTime"
+          type="time"
           className="input input-bordered w-full"
           required
-          min={1}
-          max={3}
         />
+        <p className="text-sm text-gray-500 mt-1">
+          Par exemple : 17:00. Les matchs suivants s'enchaîneront ensuite.
+        </p>
       </div>
-      <div className="mb-3">
-        <label className="block mb-1 font-medium">Points</label>
-        <input
-          name="points"
-          type="number"
-          className="input input-bordered w-full"
-          min={-5}
-        />
-      </div>
-      <div className="flex gap-2">
+
+      <div className="flex gap-2 mt-4">
         <button className="btn btn-warning" type="submit">
           {submitLabel}
         </button>

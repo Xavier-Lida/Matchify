@@ -58,9 +58,13 @@ export default function Dashboard() {
   };
 
   // Handle schedule generation
-  const handleGenerateSchedule = () => {
-    const schedule = generateSchedule(teams, false);
+  const handleGenerateSchedule = (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target); // e.target est le formulaire
+    const data = Object.fromEntries(formData.entries());
+    const schedule = generateSchedule(teams, data);
     exportSchedule(schedule);
+    setGenerateSchedule(false);
   };
   const currentTeam = teams[currentIndex];
 
@@ -96,7 +100,7 @@ export default function Dashboard() {
         )}
         {generateScheduleForm && (
           <ScheduleForm
-            onSubmit={handleGenerateSchedule}
+            onSubmit={(e) => handleGenerateSchedule(e)}
             onCancel={() => setGenerateSchedule(false)}
             submitLabel="Générer horaire"
           />
