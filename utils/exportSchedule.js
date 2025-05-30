@@ -4,7 +4,20 @@ export async function exportSchedule(schedule) {
   }
 
   try {
-    const res = await fetch("/api/games", {
+    // 1. Supprimer les anciens matchs planifiés
+    const deleteRes = await fetch("/api/games?status=scheduled", {
+      method: "DELETE",
+    });
+
+    if (!deleteRes.ok) {
+      const errorText = await deleteRes.text();
+      throw new Error(`Erreur lors de la suppression : ${deleteRes.status} — ${errorText}`);
+    }
+
+    console.log("🗑 Ancien calendrier supprimé.");
+
+    // 2. Insérer le nouvel horaire
+    const insertRes = await fetch("/api/games", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -12,16 +25,16 @@ export async function exportSchedule(schedule) {
       body: JSON.stringify({ games: schedule }),
     });
 
-    if (!res.ok) {
-      const errorText = await res.text();
-      throw new Error(`Erreur d'envoi : ${res.status} — ${errorText}`);
+    if (!insertRes.ok) {
+      const errorText = await insertRes.text();
+      throw new Error(`Erreur d'insertion : ${insertRes.status} — ${errorText}`);
     }
 
-    const result = await res.json();
-    console.log("✅ Matchs exportés avec succès :", result);
+    const result = await insertRes.json();
+    console.log("✅ Nouveau calendrier exporté avec succès :", result);
     return result;
   } catch (error) {
-    console.error("❌ Erreur lors de l'exportation des matchs :", error);
+    console.error("❌ Erreur dans exportSchedule :", error);
     throw error;
   }
 }

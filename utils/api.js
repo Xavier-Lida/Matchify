@@ -51,3 +51,17 @@ export async function deleteTeam(teamId) {
     throw error;
   }
 }
+export async function fetchGames() {
+  try {
+    const url = new URL('/api/games', 'http://localhost:3000');
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const gamesData = await response.json();
+    return gamesData;
+  } catch (error) {
+    console.error('Error fetching games:', error);
+    return [];
+  }
+}

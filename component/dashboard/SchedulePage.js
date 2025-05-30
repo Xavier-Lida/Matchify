@@ -1,55 +1,32 @@
-import { useEffect, useState } from "react";
-import { generateSchedule } from "@/utils/generateSchedule";
-import { exportSchedule } from "@/utils/exportSchedule";
+import { fetchGames } from "@/utils/api";
 
-async function getTeams() {
-  try {
-    const response = await fetch("/api/teams", {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    });
+export default async function SchedulePage() {
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const teams = await response.json();
-    return teams;
-  } catch (error) {
-    console.error("Error fetching teams:", error);
-    throw error;
-  }
-}
-
-export default function SchedulePage() {
-  const [teams, setTeams] = useState([]);
-  const [schedule, setSchedule] = useState([]);
-
-  useEffect(() => {
-    async function fetchAndGenerate() {
-      try {
-        const teamData = await getTeams();
-        setTeams(teamData);
-
-        const teamNames = teamData.map((team) => team.name); // ou un autre identifiant
-        const generated = generateSchedule(teamNames, true);
-        await exportSchedule(generated);
-        setSchedule(generated);
-      } catch (error) {
-        console.error("Error generating schedule:", error);
-      }
-    }
-
-    fetchAndGenerate();
-  }, []);
+  const schedule = await fetchGames();
 
   return (
     <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Calendrier des matchs</h2>
-      <ul className="space-y-2">
+      <h2 className="text-2xl font-bold mb-6">Calendrier des matchs</h2>
+      <ul className="space-y-4">
         {schedule.map((match, index) => (
-          <li key={index} className="bg-gray-100 p-2 rounded">
-            🕒 Journée {match.day} : <strong>{match.teamA}</strong> vs <strong>{match.teamB}</strong>
+          <li
+            key={index}
+            className="bg-white shadow rounded-lg p-4 border border-gray-200"
+          >
+            <div className="flex justify-between items-center mb-2">
+              <div className="text-sm text-gray-500">
+                🕒 Journée {match.day}
+              </div>
+              <div className="text-sm text-gray-500">
+                {match.date} à {match.time}
+              </div>
+            </div>
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-lg font-semibold">{match.teamA.name}</span>
+              <span className="text-gray-400">vs</span>
+              <span className="text-lg font-semibold">{match.teamB.name}</span>
+            </div>
+            <div className="text-sm text-gray-600">📍 {match.location}</div>
           </li>
         ))}
       </ul>

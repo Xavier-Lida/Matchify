@@ -7,6 +7,7 @@ export default function Sidebar({
   teams = [],
   selectedTeamId,
   onSelect,
+  onGenerateSchedule,
   onAddTeam,
 }) {
   return (
@@ -33,9 +34,16 @@ export default function Sidebar({
         ))}
       </ul>
       <button
+        className="btn btn-warning mt-4 mb-3"
+        style={{ marginTop: "auto" }}
+        onClick={onGenerateSchedule}
+      >
+        Générer horaire
+      </button>
+      <button
         className="btn btn-success mt-4 mb-3"
         style={{ marginTop: "auto" }}
-        onClick={onAddTeam}
+        onClick={() => onSelect(null)}
       >
         Entrer un match
       </button>

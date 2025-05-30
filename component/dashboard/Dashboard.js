@@ -4,6 +4,9 @@ import TeamManager from "./TeamManager";
 import Sidebar from "./Sidebar";
 import TeamForm from "./TeamForm";
 import { getTeams, postTeam } from "@/utils/api";
+import ScheduleForm from "./ScheduleForm";
+import { generateSchedule } from "@/utils/generateSchedule";
+import { exportSchedule } from "@/utils/exportSchedule";
 
 export default function Dashboard() {
   const teamProps = {
@@ -22,6 +25,7 @@ export default function Dashboard() {
   };
   const [teams, setTeams] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [generateScheduleForm, setGenerateSchedule] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
   const [newTeam, setNewTeam] = useState(teamProps);
 
@@ -34,7 +38,7 @@ export default function Dashboard() {
     e.preventDefault();
     await postTeam(newTeam);
     // Refresh teams list
-    const updated = await getTeams()
+    const updated = await getTeams();
     setTeams(updated);
     setShowAdd(false);
     setNewTeam(teamProps);
@@ -53,6 +57,11 @@ export default function Dashboard() {
     }
   };
 
+  // Handle schedule generation
+  const handleGenerateSchedule = () => {
+    const schedule = generateSchedule(teams, false);
+    exportSchedule(schedule);
+  };
   const currentTeam = teams[currentIndex];
 
   return (
@@ -70,6 +79,7 @@ export default function Dashboard() {
           const idx = teams.findIndex((t) => t._id === teamId);
           if (idx !== -1) setCurrentIndex(idx);
         }}
+        onGenerateSchedule={() => setGenerateSchedule(true)}
         onAddTeam={() => setShowAdd(true)}
       />
       <main className="flex-1 flex flex-col items-center justify-center">
@@ -84,7 +94,14 @@ export default function Dashboard() {
             submitLabel="Créer"
           />
         )}
-        {currentTeam && !showAdd ? (
+        {generateScheduleForm && (
+          <ScheduleForm
+            onSubmit={handleGenerateSchedule}
+            onCancel={() => setGenerateSchedule(false)}
+            submitLabel="Générer horaire"
+          />
+        )}
+        {currentTeam && !showAdd && !generateScheduleForm ? (
           <TeamManager team={currentTeam} onTeamDeleted={handleTeamDeleted} />
         ) : null}
         {!currentTeam && !showAdd ? <div>Aucune équipe</div> : null}

@@ -72,27 +72,40 @@ export async function PUT(request) {
   }
 }
 
-// DELETE — Supprimer un match (par _id dans le body)
+// DELETE — Supprimer un ou plusieurs matchs
 export async function DELETE(request) {
   try {
     const client = await clientPromise;
     const db = client.db();
-    const { id } = await request.json();
+    const url = new URL(request.url);
+    const status = url.searchParams.get("status");
 
-    if (!id) {
-      return NextResponse.json({ error: "ID requis." }, { status: 400 });
+    if (status) {
+      // Suppression par status (ex: status=scheduled)
+      const result = await db.collection("games").deleteMany({ status });
+      return NextResponse.json({
+        message: `Matchs avec le statut "${status}" supprimés.`,
+        deletedCount: result.deletedCount,
+      });
+    } else {
+      // Suppression par ID (depuis le body)
+      const { id } = await request.json();
+      if (!id) {
+        return NextResponse.json({ error: "ID requis." }, { status: 400 });
+      }
+
+      const result = await db
+        .collection("games")
+        .deleteOne({ _id: new ObjectId(id) });
+
+      return NextResponse.json({
+        message: "Match supprimé.",
+        deletedCount: result.deletedCount,
+      });
     }
-
-    const result = await db
-      .collection("games")
-      .deleteOne({ _id: new ObjectId(id) });
-
-    return NextResponse.json({
-      message: "Match supprimé.",
-      deletedCount: result.deletedCount,
-    });
   } catch (error) {
     console.error("DELETE /api/games:", error);
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
   }
 }
+

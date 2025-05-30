@@ -1,4 +1,3 @@
-"use client";
 import SchedulePage from "@/component/dashboard/SchedulePage";
 export default function HomePage() {
   
