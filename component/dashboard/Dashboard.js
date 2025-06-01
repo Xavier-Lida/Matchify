@@ -7,6 +7,8 @@ import { getTeams, postTeam } from "@/utils/api";
 import ScheduleForm from "./ScheduleForm";
 import { generateSchedule } from "@/utils/generateSchedule";
 import { exportSchedule } from "@/utils/exportSchedule";
+import MatchForm from "./matchs/MatchForm";
+import { fetchGames } from "@/utils/api";
 
 export default function Dashboard() {
   const teamProps = {
@@ -28,12 +30,24 @@ export default function Dashboard() {
   const [generateScheduleForm, setGenerateSchedule] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
   const [newTeam, setNewTeam] = useState(teamProps);
+  const [showMatchForm, setShowMatchForm] = useState(false);
+  const [schedule, setSchedule] = useState([]);
+  
 
   // Fetch teams from your API
   useEffect(() => {
     getTeams().then((data) => setTeams(data));
   }, []);
 
+  // Fetch schedule from your API
+    useEffect(() => {
+    const loadSchedule = async () => {
+      const result = await fetchGames();
+      setSchedule(Object.values(result)); // ici tu transformes si nécessaire
+    };
+
+    loadSchedule();
+  }, []);
   const handleAddTeam = async (e) => {
     e.preventDefault();
     await postTeam(newTeam);
@@ -66,6 +80,14 @@ export default function Dashboard() {
     exportSchedule(schedule);
     setGenerateSchedule(false);
   };
+
+  // Handle match entry
+  const handleMatchEntry = (e) => {
+    e.preventDefault();
+    // Logic to handle match entry
+    setShowMatchForm(false);
+  };
+
   const currentTeam = teams[currentIndex];
 
   return (
@@ -85,6 +107,7 @@ export default function Dashboard() {
         }}
         onGenerateSchedule={() => setGenerateSchedule(true)}
         onAddTeam={() => setShowAdd(true)}
+        onEnterResult={() => setShowMatchForm(true)}
       />
       <main className="flex-1 flex flex-col items-center justify-center">
         {showAdd && (
@@ -105,7 +128,16 @@ export default function Dashboard() {
             submitLabel="Générer horaire"
           />
         )}
-        {currentTeam && !showAdd && !generateScheduleForm ? (
+        {showMatchForm && (
+          <MatchForm
+            onSubmit={(e) => handleMatchEntry(e)}
+            onCancel={() => setShowMatchForm(false)}
+            submitLabel="Entrer un match"
+            scheduledGames={schedule && schedule.length > 0 ? schedule : []}
+            teams={teams}
+          />
+        )}
+        {currentTeam && !showAdd && !generateScheduleForm && !showMatchForm ? (
           <TeamManager team={currentTeam} onTeamDeleted={handleTeamDeleted} />
         ) : null}
         {!currentTeam && !showAdd ? <div>Aucune équipe</div> : null}

@@ -9,6 +9,7 @@ export default function Sidebar({
   onSelect,
   onGenerateSchedule,
   onAddTeam,
+  onEnterResult,
 }) {
   return (
     <aside
@@ -43,7 +44,7 @@ export default function Sidebar({
       <button
         className="btn btn-success mt-4 mb-3"
         style={{ marginTop: "auto" }}
-        onClick={() => onSelect(null)}
+        onClick={onEnterResult}
       >
         Entrer un match
       </button>
