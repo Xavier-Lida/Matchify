@@ -2,7 +2,7 @@ export default function ScorerForm({ players = [], onChange }) {
   return (
     <div>
       {players?.map((player) => (
-        <div key={player._id} className="flex items-center gap-2 mb-2">
+        <div key={player.number} className="flex items-center gap-2 mb-2">
           <input
             type="number"
             name={`goals-${player._id}`}

@@ -12,7 +12,8 @@ export default function MatchForm({
   const selectedMatch = scheduledGames.find((m) => m._id === selectedMatchId);
   const [playersA, setPlayersA] = useState([]);
   const [playersB, setPlayersB] = useState([]);
-  const [scores, setScores] = useState({});
+  const [scoresA, setScoresA] = useState({});
+  const [scoresB, setScoresB] = useState({});
 
   useEffect(() => {
     if (selectedMatch) {
@@ -32,19 +33,37 @@ export default function MatchForm({
     }
   }, [selectedMatchId]);
 
-  const handleChange = (e) => {
+  useEffect(() => {
+    setScoresA({});
+    setScoresB({});
+  }, [selectedMatchId]);
+
+  const handleChangeA = (e) => {
     const { name, value } = e.target;
 
     // Extraire l'ID du joueur depuis le name, ex: "goals-123"
     const playerId = name.split("-")[1];
 
-    setScores((prev) => ({
+    setScoresA((prev) => ({
       ...prev,
       [playerId]: parseInt(value) || 0,
     }));
   };
 
-  const value = Object.values(scores).reduce((sum, val) => sum + val, 0);
+  const handleChangeB = (e) => {
+    const { name, value } = e.target;
+
+    // Extraire l'ID du joueur depuis le name, ex: "goals-123"
+    const playerId = name.split("-")[1];
+
+    setScoresB((prev) => ({
+      ...prev,
+      [playerId]: parseInt(value) || 0,
+    }));
+  };
+
+  const valueA = Object.values(scoresA).reduce((sum, val) => sum + val, 0);
+  const valueB = Object.values(scoresB).reduce((sum, val) => sum + val, 0);
 
   return (
     <form
@@ -81,7 +100,7 @@ export default function MatchForm({
             name="scoreA"
             min={0}
             className="input input-bordered w-full"
-            value={value || 0}
+            value={valueA || 0}
             readOnly
           />
         </div>
@@ -95,7 +114,8 @@ export default function MatchForm({
             name="scoreB"
             min={0}
             className="input input-bordered w-full"
-            required
+            value={valueB || 0}
+            readOnly
           />
         </div>
       </div>
@@ -104,8 +124,8 @@ export default function MatchForm({
       <div>
         <label className="block mb-1 font-medium">Buteurs</label>
         <div className="flex justify-between">
-          <ScorerForm players={playersA} onChange={handleChange} />
-          <ScorerForm players={playersB} onChange={handleChange} />
+          <ScorerForm players={playersA} onChange={handleChangeA} />
+          <ScorerForm players={playersB} onChange={handleChangeB} />
         </div>
       </div>
 
