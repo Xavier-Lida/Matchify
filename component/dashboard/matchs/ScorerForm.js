@@ -1,4 +1,4 @@
-export default function ScorerForm({ players = []}) {
+export default function ScorerForm({ players = [], onChange }) {
   return (
     <div>
       {players?.map((player) => (
@@ -6,9 +6,11 @@ export default function ScorerForm({ players = []}) {
           <input
             type="number"
             name={`goals-${player._id}`}
-            placeholder={`Buts pour ${player.firstName}`}
+            onChange={onChange}
+            // placeholder={`Buts pour ${player.firstName}`}
             min={0}
-            className="input input-sm input-bordered w-32"
+            defaultValue={0}
+            className="input input-sm input-bordered w-12"
           />
           <span>
             {player.firstName} {player.lastName}

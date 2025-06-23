@@ -12,7 +12,8 @@ export default function MatchForm({
   const selectedMatch = scheduledGames.find((m) => m._id === selectedMatchId);
   const [playersA, setPlayersA] = useState([]);
   const [playersB, setPlayersB] = useState([]);
-  
+  const [scores, setScores] = useState({});
+
   useEffect(() => {
     if (selectedMatch) {
       const matchA_id = selectedMatch.teamA._id;
@@ -31,7 +32,20 @@ export default function MatchForm({
     }
   }, [selectedMatchId]);
 
-  console.log(selectedMatch);
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    // Extraire l'ID du joueur depuis le name, ex: "goals-123"
+    const playerId = name.split("-")[1];
+
+    setScores((prev) => ({
+      ...prev,
+      [playerId]: parseInt(value) || 0,
+    }));
+  };
+
+  const value = Object.values(scores).reduce((sum, val) => sum + val, 0);
+
   return (
     <form
       className="bg-white rounded-lg shadow-lg p-6 w-full max-w-2xl flex flex-col gap-4"
@@ -67,7 +81,8 @@ export default function MatchForm({
             name="scoreA"
             min={0}
             className="input input-bordered w-full"
-            required
+            value={value || 0}
+            readOnly
           />
         </div>
         <span className="text-xl font-bold">-</span>
@@ -89,8 +104,8 @@ export default function MatchForm({
       <div>
         <label className="block mb-1 font-medium">Buteurs</label>
         <div className="flex justify-between">
-          <ScorerForm players={playersA} />
-          <ScorerForm players={playersB} />
+          <ScorerForm players={playersA} onChange={handleChange} />
+          <ScorerForm players={playersB} onChange={handleChange} />
         </div>
       </div>
 
