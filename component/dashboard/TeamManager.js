@@ -5,7 +5,12 @@ import PlayerForm from "./PlayerForm";
 import PlayerList from "./PlayerList";
 import { useState, useEffect } from "react";
 import { cleanPlayers, sendPlayersToDb } from "@/utils/exportPlayers";
-import { getPlayersByTeamId, updateTeam, deleteTeam, insertPlayers } from "@/utils/api";
+import {
+  getPlayersByTeamId,
+  updateTeam,
+  deleteTeam,
+  insertPlayers,
+} from "@/utils/api";
 
 export default function TeamManager({ team: initialTeam, onTeamDeleted }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -49,31 +54,36 @@ export default function TeamManager({ team: initialTeam, onTeamDeleted }) {
   const handleSavePlayers = async (players) => {
     const cleanedPlayers = cleanPlayers(players, team._id);
 
-    // Update existing and new players in DB
-    await sendPlayersToDb(cleanedPlayers, team._id);
+    // 1. Update existing players only
+    const existingPlayers = cleanedPlayers.filter((p) => p._id);
+    if (existingPlayers.length > 0) {
+      await sendPlayersToDb(existingPlayers, team._id);
+    }
 
-    // Insert only new players
-    const newPlayers = cleanedPlayers.filter((player) => !player._id);
+    // 2. Insert only new players
+    const newPlayers = cleanedPlayers.filter((p) => !p._id);
     let insertedPlayers = [];
     if (newPlayers.length > 0) {
       insertedPlayers = await insertPlayers(newPlayers);
     }
 
-    // Merge new _ids into cleanedPlayers
+    // 3. Merge new _ids into cleanedPlayers
     const mergedPlayers = cleanedPlayers.map((player) => {
       if (!player._id) {
-        const inserted = insertedPlayers.find((p) => p.number === player.number);
+        const inserted = insertedPlayers.find(
+          (p) => p.number === player.number
+        );
         return inserted ? { ...player, _id: inserted._id } : player;
       }
       return player;
     });
 
-    // Update the team object in your backend and state
+    // 4. Update the team object in your backend and state
     const updatedTeam = { ...team, players: mergedPlayers };
     await updateTeam(updatedTeam);
     setTeam(updatedTeam);
 
-    // Refresh players from DB to avoid duplicates
+    // 5. Refresh players from DB to avoid duplicates
     const refreshedPlayers = await getPlayersByTeamId(team._id);
     setPlayers(refreshedPlayers);
 
