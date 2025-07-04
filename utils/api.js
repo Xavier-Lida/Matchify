@@ -65,3 +65,17 @@ export async function fetchGames() {
     return [];
   }
 }
+export async function insertPlayers(players) {
+  try {
+    const response = await fetch("/api/players", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ players }),
+    });
+    const data = await response.json();
+    return data.insertedPlayers || [];
+  } catch (error) {
+    console.error("Error inserting players:", error);
+    throw error;
+  }
+}

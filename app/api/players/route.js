@@ -17,14 +17,17 @@ export async function POST(request) {
   const db = client.db();
   const data = await request.json();
 
-  if (Array.isArray(data.players)) {
+  if (Array.isArray(data.players) && data.players.length > 0) {
     // Bulk insert
     const result = await db.collection("players").insertMany(data.players);
-    return NextResponse.json({ insertedCount: result.insertedCount });
+    const insertedPlayers = await db
+      .collection("players")
+      .find({ _id: { $in: Object.values(result.insertedIds) } })
+      .toArray();
+    return NextResponse.json({ insertedPlayers });
   } else {
-    // Single insert (fallback)
-    const result = await db.collection("players").insertOne(data);
-    return NextResponse.json(result);
+    // No players to insert, return empty array
+    return NextResponse.json({ insertedPlayers: [] });
   }
 }
 

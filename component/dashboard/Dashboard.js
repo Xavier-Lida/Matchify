@@ -32,7 +32,6 @@ export default function Dashboard() {
   const [newTeam, setNewTeam] = useState(teamProps);
   const [showMatchForm, setShowMatchForm] = useState(false);
   const [schedule, setSchedule] = useState([]);
-  
 
   // Fetch teams from your API
   useEffect(() => {
@@ -40,7 +39,7 @@ export default function Dashboard() {
   }, []);
 
   // Fetch schedule from your API
-    useEffect(() => {
+  useEffect(() => {
     const loadSchedule = async () => {
       const result = await fetchGames();
       setSchedule(Object.values(result)); // ici tu transformes si nécessaire
@@ -82,9 +81,78 @@ export default function Dashboard() {
   };
 
   // Handle match entry
-  const handleMatchEntry = (e) => {
+  const handleMatchEntry = async (e, data) => {
     e.preventDefault();
-    // Logic to handle match entry
+
+    const {
+      selectedMatchId,
+      scoresA,
+      scoresB,
+      playersA,
+      playersB,
+      cardsA = {},
+      cardsB = {},
+    } = data;
+
+    console.log("Match Entry Data:", data);
+    
+    // 1. Update the match result and status
+    await fetch(`/api/games`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        _id: selectedMatchId,
+        scoreA: Object.values(scoresA).reduce(
+          (sum, val) => sum + (val || 0),
+          0
+        ),
+        scoreB: Object.values(scoresB).reduce(
+          (sum, val) => sum + (val || 0),
+          0
+        ),
+        status: "played",
+      }),
+    });
+
+    // 2. Update player stats for team A
+    await Promise.all(
+      playersA.map(async (player) => {
+        const goals = scoresA[player._id] || 0;
+        const yellowCards = cardsA[player._id]?.yellow || 0;
+        const redCards = cardsA[player._id]?.red || 0;
+
+        await fetch(`/api/players`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            _id: player._id,
+            goals: (player.goals || 0) + goals,
+            yellowCards: (player.yellowCards || 0) + yellowCards,
+            redCards: (player.redCards || 0) + redCards,
+          }),
+        });
+      })
+    );
+
+    // 3. Update player stats for team B
+    await Promise.all(
+      playersB.map(async (player) => {
+        const goals = scoresB[player._id] || 0;
+        const yellowCards = cardsB[player._id]?.yellow || 0;
+        const redCards = cardsB[player._id]?.red || 0;
+        await fetch(`/api/players`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            _id: player._id,
+            goals: (player.goals || 0) + goals,
+            yellowCards: (player.yellowCards || 0) + yellowCards,
+            redCards: (player.redCards || 0) + redCards,
+          }),
+        });
+      })
+    );
+
     setShowMatchForm(false);
   };
 
@@ -130,7 +198,7 @@ export default function Dashboard() {
         )}
         {showMatchForm && (
           <MatchForm
-            onSubmit={(e) => handleMatchEntry(e)}
+            onSubmit={(e, data) => handleMatchEntry(e, data)}
             onCancel={() => setShowMatchForm(false)}
             submitLabel="Entrer un match"
             scheduledGames={schedule && schedule.length > 0 ? schedule : []}

@@ -68,7 +68,7 @@ export default function MatchForm({
   return (
     <form
       className="bg-white rounded-lg shadow-lg p-6 w-full max-w-2xl flex flex-col gap-4"
-      onSubmit={onSubmit}
+      onSubmit={(e) => onSubmit(e, { selectedMatchId, scoresA, scoresB, playersA, playersB })}
     >
       {/* Sélection du match */}
       <div>
