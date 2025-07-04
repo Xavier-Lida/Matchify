@@ -45,9 +45,19 @@ export async function PUT(request) {
   const client = await clientPromise;
   const db = client.db();
   const data = await request.json();
-  const { _id, ...rest } = data;
-  await db
-    .collection("players")
-    .updateOne({ _id: new ObjectId(_id) }, { $set: rest });
+  const { _id, goals = 0, yellowCards = 0, redCards = 0 } = data;
+
+  // Use $inc to increment stats
+  await db.collection("players").updateOne(
+    { _id: new ObjectId(_id) },
+    {
+      $inc: {
+        goals,
+        yellowCards,
+        redCards,
+      },
+    }
+  );
+
   return NextResponse.json({ success: true });
 }

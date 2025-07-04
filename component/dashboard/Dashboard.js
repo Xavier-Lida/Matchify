@@ -126,9 +126,9 @@ export default function Dashboard() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             _id: player._id,
-            goals: (player.goals || 0) + goals,
-            yellowCards: (player.yellowCards || 0) + yellowCards,
-            redCards: (player.redCards || 0) + redCards,
+            goals,        // just the increment
+            yellowCards,  // just the increment
+            redCards,     // just the increment
           }),
         });
       })
@@ -145,13 +145,75 @@ export default function Dashboard() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             _id: player._id,
-            goals: (player.goals || 0) + goals,
-            yellowCards: (player.yellowCards || 0) + yellowCards,
-            redCards: (player.redCards || 0) + redCards,
+            goals,        // just the increment
+            yellowCards,  // just the increment
+            redCards,     // just the increment
           }),
         });
       })
     );
+
+    // 4. Update team stats
+    const teamA = teams.find((t) =>
+      playersA.length > 0 ? t._id === playersA[0].teamId : false
+    );
+    const teamB = teams.find((t) =>
+      playersB.length > 0 ? t._id === playersB[0].teamId : false
+    );
+
+    const scoreA = Object.values(scoresA).reduce((sum, val) => sum + (val || 0), 0);
+    const scoreB = Object.values(scoresB).reduce((sum, val) => sum + (val || 0), 0);
+
+    if (teamA && teamB) {
+      // Calculate new stats for teamA
+      let updateA = {
+        gamesPlayed: (teamA.gamesPlayed || 0) + 1,
+        goalsFor: (teamA.goalsFor || 0) + scoreA,
+        goalsAgainst: (teamA.goalsAgainst || 0) + scoreB,
+        wins: teamA.wins || 0,
+        losses: teamA.losses || 0,
+        draws: teamA.draws || 0,
+        points: teamA.points || 0,
+      };
+      let updateB = {
+        gamesPlayed: (teamB.gamesPlayed || 0) + 1,
+        goalsFor: (teamB.goalsFor || 0) + scoreB,
+        goalsAgainst: (teamB.goalsAgainst || 0) + scoreA,
+        wins: teamB.wins || 0,
+        losses: teamB.losses || 0,
+        draws: teamB.draws || 0,
+        points: teamB.points || 0,
+      };
+
+      if (scoreA > scoreB) {
+        updateA.wins += 1;
+        updateA.points += 3;
+        updateB.losses += 1;
+      } else if (scoreA < scoreB) {
+        updateB.wins += 1;
+        updateB.points += 3;
+        updateA.losses += 1;
+      } else {
+        updateA.draws += 1;
+        updateB.draws += 1;
+        updateA.points += 1;
+        updateB.points += 1;
+      }
+
+      // Update teamA
+      await fetch(`/api/teams`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...teamA, ...updateA }),
+      });
+
+      // Update teamB
+      await fetch(`/api/teams`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...teamB, ...updateB }),
+      });
+    }
 
     setShowMatchForm(false);
   };
