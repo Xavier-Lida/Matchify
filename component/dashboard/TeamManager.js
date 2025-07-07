@@ -79,14 +79,7 @@ export default function TeamManager({ team: initialTeam, onTeamDeleted }) {
     });
 
     // 4. Update the team object in your backend and state
-    const updatedTeam = { ...team, players: mergedPlayers };
-    await updateTeam(updatedTeam);
-    setTeam(updatedTeam);
-
-    // 5. Refresh players from DB to avoid duplicates
-    const refreshedPlayers = await getPlayersByTeamId(team._id);
-    setPlayers(refreshedPlayers);
-
+    await getPlayersByTeamId(team._id).then(setPlayers);
     setShowPlayers(false);
   };
 

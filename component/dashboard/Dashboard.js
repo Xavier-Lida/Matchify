@@ -15,7 +15,6 @@ export default function Dashboard() {
     name: "",
     division: "",
     points: 0,
-    players: [],
     gamesPlayed: 0,
     wins: 0,
     losses: 0,

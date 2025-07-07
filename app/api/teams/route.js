@@ -21,11 +21,10 @@ export async function PUT(request) {
   const client = await clientPromise;
   const db = client.db();
   const data = await request.json();
-  const { _id, ...update } = data;
-  await db.collection("teams").updateOne(
-    { _id: new ObjectId(_id) },
-    { $set: update }
-  );
+  const { _id, ...update } = data; // Destructure and ignore 'players'
+  await db
+    .collection("teams")
+    .updateOne({ _id: new ObjectId(_id) }, { $set: update });
   return NextResponse.json({ success: true });
 }
 
