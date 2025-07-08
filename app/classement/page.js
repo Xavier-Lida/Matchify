@@ -30,7 +30,9 @@ export default function HomePage() {
     fetch("/api/teams")
       .then((res) => res.json())
       .then((teamsData) => {
-        const divisions = Array.from(new Set(teamsData.map((team) => team.division))).filter(Boolean);
+        const divisions = Array.from(
+          new Set(teamsData.map((team) => team.division))
+        ).filter(Boolean);
         setTeamFilters((prev) =>
           prev.map((filter) =>
             filter.name === "division"
@@ -71,7 +73,9 @@ export default function HomePage() {
         fetch("/api/players/scorers")
           .then((res) => res.json())
           .then((players) => {
-            const teamMap = Object.fromEntries(teamsData.map((t) => [t._id, t.name]));
+            const teamMap = Object.fromEntries(
+              teamsData.map((t) => [t._id, t.name])
+            );
             const filtered = players
               .filter((p) =>
                 !scorerFilters[0].value
@@ -85,12 +89,12 @@ export default function HomePage() {
               .sort((a, b) => b.goals - a.goals)
               .map((player, idx) => ({
                 ranking: idx + 1,
-                name: player.name,
+                name: player.firstName + " " + player.lastName,
                 team: teamMap[player.teamId] || "-",
-                gamesPlayed: player.gamesPlayed ?? "-",
+                gamesPlayed: "-",
                 goals: player.goals,
                 assists: player.assists ?? "-",
-                points: player.points ?? "-",
+                points: player.goals ?? "-",
               }));
             setScorers(filtered);
           });
@@ -132,19 +136,17 @@ export default function HomePage() {
           .filter((p) =>
             !value
               ? true
-              : teams.find(
-                  (t) => t._id === p.teamId && t.division === value
-                )
+              : teams.find((t) => t._id === p.teamId && t.division === value)
           )
           .sort((a, b) => b.goals - a.goals)
           .map((player, idx) => ({
             ranking: idx + 1,
-            name: player.name,
+            name: player.firstName + " " + player.lastName,
             team: teamMap[player.teamId] || "-",
-            gamesPlayed: player.gamesPlayed ?? "-",
+            gamesPlayed: "-",
             goals: player.goals,
             assists: player.assists ?? "-",
-            points: player.goals + player.assists ?? "-",
+            points: player.goals ?? "-",
           }));
         setScorers(filtered);
       });
@@ -177,7 +179,7 @@ export default function HomePage() {
     { key: "team", label: "Équipe", align: "text-left" },
     { key: "gamesPlayed", label: "MJ" },
     { key: "goals", label: "B" },
-    { key: "assists", label: "A" },
+    // { key: "assists", label: "A" },
     { key: "points", label: "PTS" },
   ];
 
