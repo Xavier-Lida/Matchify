@@ -1,8 +1,19 @@
-import { fetchGames } from "@/utils/api";
+"use client";
+import React, { useEffect, useState } from "react";
+import { fetchGames, getTeams } from "@/utils/api";
 
-export default async function SchedulePage() {
+export default function SchedulePage() {
+  const [schedule, setSchedule] = useState([]);
+  const [teams, setTeams] = useState([]);
 
-  const schedule = await fetchGames();
+  useEffect(() => {
+    fetchGames().then(setSchedule);
+    getTeams().then(setTeams);
+  }, []);
+
+  // Helper to get team name by ID
+  const getTeamName = (id) =>
+    teams.find((t) => t._id === id)?.name || "Équipe inconnue";
 
   return (
     <div className="p-4">
@@ -22,9 +33,13 @@ export default async function SchedulePage() {
               </div>
             </div>
             <div className="flex items-center justify-between mb-1">
-              <span className="text-lg font-semibold">{match.teamA.name}</span>
+              <span className="text-lg font-semibold">
+                {getTeamName(match.teamA)}
+              </span>
               <span className="text-gray-400">vs</span>
-              <span className="text-lg font-semibold">{match.teamB.name}</span>
+              <span className="text-lg font-semibold">
+                {getTeamName(match.teamB)}
+              </span>
             </div>
             <div className="text-sm text-gray-600">📍 {match.location}</div>
           </li>
