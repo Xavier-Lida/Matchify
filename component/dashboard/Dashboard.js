@@ -94,7 +94,7 @@ export default function Dashboard() {
     } = data;
 
     console.log("Match Entry Data:", data);
-    
+
     // 1. Update the match result and status
     await fetch(`/api/games`, {
       method: "PUT",
@@ -125,9 +125,9 @@ export default function Dashboard() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             _id: player._id,
-            goals,        // just the increment
-            yellowCards,  // just the increment
-            redCards,     // just the increment
+            goals, // just the increment
+            yellowCards, // just the increment
+            redCards, // just the increment
           }),
         });
       })
@@ -144,9 +144,9 @@ export default function Dashboard() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             _id: player._id,
-            goals,        // just the increment
-            yellowCards,  // just the increment
-            redCards,     // just the increment
+            goals, // just the increment
+            yellowCards, // just the increment
+            redCards, // just the increment
           }),
         });
       })
@@ -160,8 +160,14 @@ export default function Dashboard() {
       playersB.length > 0 ? t._id === playersB[0].teamId : false
     );
 
-    const scoreA = Object.values(scoresA).reduce((sum, val) => sum + (val || 0), 0);
-    const scoreB = Object.values(scoresB).reduce((sum, val) => sum + (val || 0), 0);
+    const scoreA = Object.values(scoresA).reduce(
+      (sum, val) => sum + (val || 0),
+      0
+    );
+    const scoreB = Object.values(scoresB).reduce(
+      (sum, val) => sum + (val || 0),
+      0
+    );
 
     if (teamA && teamB) {
       // Calculate new stats for teamA
@@ -259,11 +265,11 @@ export default function Dashboard() {
         )}
         {showMatchForm && (
           <MatchForm
+            teams={teams}
             onSubmit={(e, data) => handleMatchEntry(e, data)}
             onCancel={() => setShowMatchForm(false)}
             submitLabel="Entrer un match"
             scheduledGames={schedule && schedule.length > 0 ? schedule : []}
-            teams={teams}
           />
         )}
         {currentTeam && !showAdd && !generateScheduleForm && !showMatchForm ? (

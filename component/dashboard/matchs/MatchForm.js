@@ -1,37 +1,32 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { getPlayersByTeamId } from "@/utils/api";
 import ScorerForm from "./ScorerForm";
 
 export default function MatchForm({
+  teams = { teams },
   onSubmit,
   onCancel,
   submitLabel = "",
   scheduledGames,
-  teams = [],
 }) {
   const [selectedMatchId, setSelectedMatchId] = useState("");
   const selectedMatch = scheduledGames.find((m) => m._id === selectedMatchId);
+
   const [playersA, setPlayersA] = useState([]);
   const [playersB, setPlayersB] = useState([]);
-  const [scoresA, setScoresA] = useState({});
-  const [scoresB, setScoresB] = useState({});
 
   useEffect(() => {
     if (selectedMatch) {
-      const matchA_id = selectedMatch.teamA._id;
-      setPlayersA(teams.find((team) => team._id === matchA_id).players);
+      getPlayersByTeamId(selectedMatch.teamA).then(setPlayersA);
+      getPlayersByTeamId(selectedMatch.teamB).then(setPlayersB);
     } else {
       setPlayersA([]);
-    }
-  }, [selectedMatchId]);
-
-  useEffect(() => {
-    if (selectedMatch) {
-      const matchB_id = selectedMatch.teamB._id;
-      setPlayersB(teams.find((team) => team._id === matchB_id).players);
-    } else {
       setPlayersB([]);
     }
-  }, [selectedMatchId]);
+  }, [selectedMatchId, selectedMatch]);
+
+  const [scoresA, setScoresA] = useState({});
+  const [scoresB, setScoresB] = useState({});
 
   useEffect(() => {
     setScoresA({});
@@ -68,7 +63,9 @@ export default function MatchForm({
   return (
     <form
       className="bg-white rounded-lg shadow-lg p-6 w-full max-w-2xl flex flex-col gap-4"
-      onSubmit={(e) => onSubmit(e, { selectedMatchId, scoresA, scoresB, playersA, playersB })}
+      onSubmit={(e) =>
+        onSubmit(e, { selectedMatchId, scoresA, scoresB, playersA, playersB })
+      }
     >
       {/* Sélection du match */}
       <div>
@@ -83,7 +80,7 @@ export default function MatchForm({
           <option value="">Sélectionner un match</option>
           {scheduledGames.map((match) => (
             <option key={match._id} value={match._id}>
-              {match.date} — {match.teamA.name} vs {match.teamB.name}
+              {match.date} — {teams.find((t) => t._id === match.teamA).name} vs {teams.find((t) => t._id === match.teamB).name}
             </option>
           ))}
         </select>
