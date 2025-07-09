@@ -26,7 +26,7 @@ export default function Hamburger() {
   };
 
   return (
-    <div ref={dropdownRef} className="relative">
+    <div ref={dropdownRef} className="relative flex justify-center">
       {/* Hamburger menu for mobile */}
       <button
         className="btn btn-ghost btn-circle lg:hidden"
@@ -49,7 +49,7 @@ export default function Hamburger() {
         </svg>
       </button>
       {dropdownOpen && (
-        <ul className="absolute right-0 mt-2 z-50 p-2 shadow bg-base-100 rounded-box w-52">
+        <ul className="absolute left-0 top-10 z-50 p-2 shadow bg-base-100 rounded-box w-40">
           <li>
             <NavigationButton
               route={ROUTES.HOMEPAGE}
