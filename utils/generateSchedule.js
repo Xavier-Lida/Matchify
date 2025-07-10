@@ -1,6 +1,6 @@
 export function generateSchedule(teams, data) {
   const schedule = [];
-  const trimester = data.trimester || 1; // Default to 1 if not provided
+  const trimester = data.trimester || 1;
 
   // 1. Group teams by division
   const divisions = {};
@@ -9,14 +9,16 @@ export function generateSchedule(teams, data) {
     divisions[team.division].push(team);
   });
 
-  // 2. Prepare all possible locations and time slots
-  const locations = ["Séminaire Saint-Joseph 1", "Séminaire Saint-Joseph 2"];
+  // 2. Prepare locations and time slots
+  const mainFields = ["Séminaire 1", "Séminaire 2"];
+  const backupField = "Séminaire 3";
   const startHour = parseInt(data.startTime.split(":")[0]);
   const minute = data.startTime.split(":")[1];
-  const slotsPerDay = 2; // adjust if you want more/less slots per day
+  const slotsPerDay = 4; // 4 slots per field per night
 
-  // 3. Track used slots globally
+  // 3. Track used slots and backup field usage
   const usedSlots = new Set();
+  const usedSeminaire3 = new Set(); // Set of dates where Séminaire 3 is used
 
   // 4. Generate schedule for each division
   Object.values(divisions).forEach((divisionTeams) => {
@@ -28,34 +30,32 @@ export function generateSchedule(teams, data) {
     const totalRounds = teamList.length - 1;
     const matchesPerRound = teamList.length / 2;
 
-    let matchIndex = 0;
-
     for (let round = 0; round < totalRounds; round++) {
-      const roundMatches = [];
-
       for (let match = 0; match < matchesPerRound; match++) {
         const home = teamList[match];
         const away = teamList[teamList.length - 1 - match];
 
         if (home !== "BYE" && away !== "BYE") {
           const dateObj = new Date(data.firstSunday);
-          dateObj.setDate(dateObj.getDate() + 7 * round); // chaque semaine
+          dateObj.setDate(dateObj.getDate() + 7 * round);
           const date = dateObj.toISOString().split("T")[0];
 
-          // Find the first available slot for this match
           let slotFound = false;
-          for (let slot = 0; slot < slotsPerDay * locations.length; slot++) {
-            const hourOffset = Math.floor(slot / locations.length);
-            const locationIdx = slot % locations.length;
-            const time = `${(startHour + hourOffset).toString().padStart(2, "0")}:${minute}`;
-            const location = locations[locationIdx];
+
+          // Try main fields first
+          for (let slot = 0; slot < slotsPerDay * mainFields.length; slot++) {
+            const hourOffset = Math.floor(slot / mainFields.length);
+            const locationIdx = slot % mainFields.length;
+            const time = `${(startHour + hourOffset)
+              .toString()
+              .padStart(2, "0")}:${minute}`;
+            const location = mainFields[locationIdx];
             const slotKey = `${date}|${time}|${location}`;
 
             if (!usedSlots.has(slotKey)) {
-              // Slot is available
               usedSlots.add(slotKey);
 
-              roundMatches.push({
+              schedule.push({
                 day: round + 1,
                 location,
                 time,
@@ -74,16 +74,45 @@ export function generateSchedule(teams, data) {
             }
           }
 
-          if (!slotFound) {
-            // If no slot is found, you can handle it (e.g., push to a "to be scheduled" list or throw an error)
-            console.warn(`No available slot for match: ${home.name} vs ${away.name} on ${date}`);
+          // If not found, try backup field for division 3 (once per night)
+          if (!slotFound && home.division === 3 && !usedSeminaire3.has(date)) {
+            for (let hourOffset = 0; hourOffset < slotsPerDay; hourOffset++) {
+              const time = `${(startHour + hourOffset)
+                .toString()
+                .padStart(2, "0")}:${minute}`;
+              const slotKey = `${date}|${time}|${backupField}`;
+              if (!usedSlots.has(slotKey)) {
+                usedSlots.add(slotKey);
+                usedSeminaire3.add(date);
+
+                schedule.push({
+                  day: round + 1,
+                  location: backupField,
+                  time,
+                  date,
+                  teamA: home._id,
+                  teamB: away._id,
+                  division: home.division,
+                  trimester,
+                  status: "scheduled",
+                  scoreA: null,
+                  scoreB: null,
+                });
+
+                slotFound = true;
+                break;
+              }
+            }
           }
 
-          matchIndex++;
+          if (!slotFound) {
+            console.warn(
+              `No available slot for match: ${home.name} vs ${away.name} on ${date}`
+            );
+          }
         }
       }
 
-      schedule.push(...roundMatches);
       // Rotate teams for next round (standard round-robin)
       const fixed = teamList[0];
       const last = teamList.pop();
