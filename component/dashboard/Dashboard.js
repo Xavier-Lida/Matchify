@@ -31,6 +31,7 @@ export default function Dashboard() {
   const [newTeam, setNewTeam] = useState(teamProps);
   const [showMatchForm, setShowMatchForm] = useState(false);
   const [schedule, setSchedule] = useState([]);
+  const [activeMenu, setActiveMenu] = useState(""); // "", "add", "schedule", "match"
 
   // Fetch teams from your API
   useEffect(() => {
@@ -240,42 +241,42 @@ export default function Dashboard() {
           const idx = teams.findIndex((t) => t._id === teamId);
           if (idx !== -1) setCurrentIndex(idx);
         }}
-        onGenerateSchedule={() => setGenerateSchedule(true)}
-        onAddTeam={() => setShowAdd(true)}
-        onEnterResult={() => setShowMatchForm(true)}
+        onGenerateSchedule={() => setActiveMenu("schedule")}
+        onAddTeam={() => setActiveMenu("add")}
+        onEnterResult={() => setActiveMenu("match")}
       />
       <main className="flex-1 flex flex-col items-center justify-center">
-        {showAdd && (
+        {activeMenu === "add" && (
           <TeamForm
             form={newTeam}
             onChange={(e) =>
               setNewTeam({ ...newTeam, [e.target.name]: e.target.value })
             }
             onSubmit={handleAddTeam}
-            onCancel={() => setShowAdd(false)}
+            onCancel={() => setActiveMenu("")}
             submitLabel="Créer"
           />
         )}
-        {generateScheduleForm && (
+        {activeMenu === "schedule" && (
           <ScheduleForm
             onSubmit={(e) => handleGenerateSchedule(e)}
-            onCancel={() => setGenerateSchedule(false)}
+            onCancel={() => setActiveMenu("")}
             submitLabel="Générer horaire"
           />
         )}
-        {showMatchForm && (
+        {activeMenu === "match" && (
           <MatchForm
             teams={teams}
             onSubmit={(e, data) => handleMatchEntry(e, data)}
-            onCancel={() => setShowMatchForm(false)}
+            onCancel={() => setActiveMenu("")}
             submitLabel="Entrer un match"
             scheduledGames={schedule && schedule.length > 0 ? schedule : []}
           />
         )}
-        {currentTeam && !showAdd && !generateScheduleForm && !showMatchForm ? (
+        {currentTeam && activeMenu === "" ? (
           <TeamManager team={currentTeam} onTeamDeleted={handleTeamDeleted} />
         ) : null}
-        {!currentTeam && !showAdd ? <div>Aucune équipe</div> : null}
+        {!currentTeam && activeMenu === "" ? <div>Aucune équipe</div> : null}
       </main>
     </div>
   );
