@@ -35,7 +35,10 @@ export default function Dashboard() {
 
   // Fetch teams from your API
   useEffect(() => {
-    getTeams().then((data) => setTeams(data));
+    getTeams().then((data) => {
+      data.sort((a, b) => a.name.localeCompare(b.name));
+      setTeams(data);
+    });
   }, []);
 
   // Fetch schedule from your API
@@ -52,6 +55,8 @@ export default function Dashboard() {
     await postTeam(newTeam);
     // Refresh teams list
     const updated = await getTeams();
+    // Sort teams alphabetically by name
+    updated.sort((a, b) => a.name.localeCompare(b.name));
     setTeams(updated);
     setShowAdd(false);
     setNewTeam(teamProps);
