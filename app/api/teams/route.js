@@ -2,11 +2,21 @@ import { NextResponse } from "next/server";
 import clientPromise from "@/libs/mongo";
 import { ObjectId } from "mongodb";
 
-export async function GET() {
-  const client = await clientPromise;
-  const db = client.db();
-  const teams = await db.collection("teams").find({}).toArray();
-  return NextResponse.json(teams);
+export async function GET(request) {
+  try {
+    const client = await clientPromise;
+    const db = client.db();
+    // Sort teams alphabetically by name in MongoDB
+    const teams = await db
+      .collection("teams")
+      .find({})
+      .sort({ name: 1 })
+      .toArray();
+    return NextResponse.json(teams);
+  } catch (error) {
+    console.error("GET /api/teams:", error);
+    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+  }
 }
 
 export async function POST(request) {
