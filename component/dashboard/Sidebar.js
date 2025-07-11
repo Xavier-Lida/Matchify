@@ -41,7 +41,7 @@ export default function Sidebar({
         ))}
       </ul>
       <button className="btn btn-warning mt-4" onClick={onGenerateSchedule}>
-        Générer horaire
+        Gérer l'horaire
       </button>
       <button className="btn btn-success mt-4" onClick={onEnterResult}>
         Entrer un match

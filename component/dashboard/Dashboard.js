@@ -266,7 +266,7 @@ export default function Dashboard() {
           <ScheduleForm
             onSubmit={(e) => handleGenerateSchedule(e)}
             onCancel={() => setActiveMenu("")}
-            submitLabel="Générer horaire"
+            submitLabel="Gérer l'horaire"
           />
         )}
         {activeMenu === "match" && (
