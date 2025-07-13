@@ -60,12 +60,61 @@ export default function MatchForm({
   const valueA = Object.values(scoresA).reduce((sum, val) => sum + val, 0);
   const valueB = Object.values(scoresB).reduce((sum, val) => sum + val, 0);
 
+  // For team A
+  const scorersA = Object.entries(scoresA)
+    .filter(([playerId, count]) => count > 0)
+    .flatMap(([playerId, count]) =>
+      Array.from({ length: count }, () => ({
+        playerId,
+        teamId: selectedMatch?.teamA,
+      }))
+    );
+
+  // For team B
+  const scorersB = Object.entries(scoresB)
+    .filter(([playerId, count]) => count > 0)
+    .flatMap(([playerId, count]) =>
+      Array.from({ length: count }, () => ({
+        playerId,
+        teamId: selectedMatch?.teamB,
+      }))
+    );
+
+  // Combine for the full goals array
+  const goals = [...scorersA, ...scorersB];
+
   return (
     <form
       className="bg-white rounded-lg shadow-lg p-6 w-full max-w-2xl flex flex-col gap-4"
-      onSubmit={(e) =>
-        onSubmit(e, { selectedMatchId, scoresA, scoresB, playersA, playersB })
-      }
+      onSubmit={(e) => {
+        // Build scorers array
+        const scorersA = Object.entries(scoresA)
+          .filter(([playerId, count]) => count > 0)
+          .flatMap(([playerId, count]) =>
+            Array.from({ length: count }, () => ({
+              playerId,
+              teamId: selectedMatch?.teamA,
+            }))
+          );
+        const scorersB = Object.entries(scoresB)
+          .filter(([playerId, count]) => count > 0)
+          .flatMap(([playerId, count]) =>
+            Array.from({ length: count }, () => ({
+              playerId,
+              teamId: selectedMatch?.teamB,
+            }))
+          );
+        const goals = [...scorersA, ...scorersB];
+
+        onSubmit(e, {
+          selectedMatchId,
+          scoresA,
+          scoresB,
+          playersA,
+          playersB,
+          goals,
+        });
+      }}
     >
       {/* Sélection du match */}
       <div>
@@ -80,7 +129,8 @@ export default function MatchForm({
           <option value="">Sélectionner un match</option>
           {scheduledGames.map((match) => (
             <option key={match._id} value={match._id}>
-              {match.date} — {teams.find((t) => t._id === match.teamA).name} vs {teams.find((t) => t._id === match.teamB).name}
+              {match.date} — {teams.find((t) => t._id === match.teamA).name} vs{" "}
+              {teams.find((t) => t._id === match.teamB).name}
             </option>
           ))}
         </select>

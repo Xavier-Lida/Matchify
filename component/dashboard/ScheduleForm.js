@@ -42,7 +42,7 @@ export default function ScheduleForm({
       {/* Sub-menus with back arrow */}
       {activeMode === "auto" && (
         <>
-          <ScheduleAuto onSubmit={onSubmitAuto} />
+          <ScheduleAuto onSubmit={onSubmitAuto} submitLabel = "Générer l'horaire"/>
           <div className="flex justify-end">
             <button
               className="btn btn-ghost flex items-center"

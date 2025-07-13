@@ -9,6 +9,11 @@ import { generateSchedule } from "@/utils/generateSchedule";
 import { exportSchedule } from "@/utils/exportSchedule";
 import MatchForm from "./matchs/MatchForm";
 import { fetchGames } from "@/utils/api";
+import {
+  calculateGoalsFor,
+  calculateGoalsForPlayer,
+  calculateTeamStats,
+} from "@/utils/calculateGames";
 
 export default function Dashboard() {
   const teamProps = {
@@ -97,11 +102,10 @@ export default function Dashboard() {
       playersB,
       cardsA = {},
       cardsB = {},
+      goals = [],
     } = data;
 
-    console.log("Match Entry Data:", data);
-
-    // 1. Update the match result and status
+    // 1. Update the match result
     await fetch(`/api/games`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -116,49 +120,15 @@ export default function Dashboard() {
           0
         ),
         status: "played",
+        goals, // <-- add the goals array here
       }),
     });
 
-    // 2. Update player stats for team A
-    await Promise.all(
-      playersA.map(async (player) => {
-        const goals = scoresA[player._id] || 0;
-        const yellowCards = cardsA[player._id]?.yellow || 0;
-        const redCards = cardsA[player._id]?.red || 0;
+    // 2. Refetch the updated schedule
+    const updatedSchedule = await fetchGames();
+    setSchedule(Object.values(updatedSchedule));
 
-        await fetch(`/api/players`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            _id: player._id,
-            goals, // just the increment
-            yellowCards, // just the increment
-            redCards, // just the increment
-          }),
-        });
-      })
-    );
-
-    // 3. Update player stats for team B
-    await Promise.all(
-      playersB.map(async (player) => {
-        const goals = scoresB[player._id] || 0;
-        const yellowCards = cardsB[player._id]?.yellow || 0;
-        const redCards = cardsB[player._id]?.red || 0;
-        await fetch(`/api/players`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            _id: player._id,
-            goals, // just the increment
-            yellowCards, // just the increment
-            redCards, // just the increment
-          }),
-        });
-      })
-    );
-
-    // 4. Update team stats
+    // 3. Now calculate team stats from the updated schedule
     const teamA = teams.find((t) =>
       playersA.length > 0 ? t._id === playersA[0].teamId : false
     );
@@ -166,50 +136,24 @@ export default function Dashboard() {
       playersB.length > 0 ? t._id === playersB[0].teamId : false
     );
 
-    const scoreA = Object.values(scoresA).reduce(
-      (sum, val) => sum + (val || 0),
-      0
-    );
-    const scoreB = Object.values(scoresB).reduce(
-      (sum, val) => sum + (val || 0),
-      0
-    );
-
     if (teamA && teamB) {
-      // Calculate new stats for teamA
+      const statsA = calculateTeamStats(
+        teamA._id,
+        Object.values(updatedSchedule)
+      );
+      const statsB = calculateTeamStats(
+        teamB._id,
+        Object.values(updatedSchedule)
+      );
+
       let updateA = {
-        gamesPlayed: (teamA.gamesPlayed || 0) + 1,
-        goalsFor: (teamA.goalsFor || 0) + scoreA,
-        goalsAgainst: (teamA.goalsAgainst || 0) + scoreB,
-        wins: teamA.wins || 0,
-        losses: teamA.losses || 0,
-        draws: teamA.draws || 0,
-        points: teamA.points || 0,
+        ...statsA,
+        points: statsA.wins * 3 + statsA.draws,
       };
       let updateB = {
-        gamesPlayed: (teamB.gamesPlayed || 0) + 1,
-        goalsFor: (teamB.goalsFor || 0) + scoreB,
-        goalsAgainst: (teamB.goalsAgainst || 0) + scoreA,
-        wins: teamB.wins || 0,
-        losses: teamB.losses || 0,
-        draws: teamB.draws || 0,
-        points: teamB.points || 0,
+        ...statsB,
+        points: statsB.wins * 3 + statsB.draws,
       };
-
-      if (scoreA > scoreB) {
-        updateA.wins += 1;
-        updateA.points += 3;
-        updateB.losses += 1;
-      } else if (scoreA < scoreB) {
-        updateB.wins += 1;
-        updateB.points += 3;
-        updateA.losses += 1;
-      } else {
-        updateA.draws += 1;
-        updateB.draws += 1;
-        updateA.points += 1;
-        updateB.points += 1;
-      }
 
       // Update teamA
       await fetch(`/api/teams`, {
@@ -225,6 +169,50 @@ export default function Dashboard() {
         body: JSON.stringify({ ...teamB, ...updateB }),
       });
     }
+
+    // 3. Update player stats for players in the match, using the goals array
+    const playedTeamIds = [
+      ...(teamA ? [teamA._id] : []),
+      ...(teamB ? [teamB._id] : []),
+    ];
+
+    await Promise.all(
+      [...playersA, ...playersB].map(async (player) => {
+        if (playedTeamIds.includes(player.teamId)) {
+          // Calculate total goals for this player in all played games (including this one)
+          const allGames = schedule
+            .map((g) =>
+              g._id === selectedMatchId
+                ? { ...g, goals, status: "played" } // update the current match with new goals
+                : g
+            )
+            .filter((g) => g.status === "played" && g.goals);
+          const goalsCount = allGames.reduce(
+            (sum, game) =>
+              sum +
+              (Array.isArray(game.goals)
+                ? game.goals.filter((g) => g.playerId === player._id).length
+                : 0),
+            0
+          );
+          const yellowCards =
+            cardsA[player._id]?.yellow || cardsB[player._id]?.yellow || 0;
+          const redCards =
+            cardsA[player._id]?.red || cardsB[player._id]?.red || 0;
+
+          await fetch(`/api/players`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              _id: player._id,
+              goals: goalsCount, // total goals for this player
+              yellowCards, // just the increment (or update as needed)
+              redCards, // just the increment (or update as needed)
+            }),
+          });
+        }
+      })
+    );
 
     setShowMatchForm(false);
   };
@@ -264,7 +252,7 @@ export default function Dashboard() {
         )}
         {activeMenu === "schedule" && (
           <ScheduleForm
-            onSubmit={(e) => handleGenerateSchedule(e)}
+            onSubmitAuto={(e) => handleGenerateSchedule(e)}
             onCancel={() => setActiveMenu("")}
             submitLabel="Gérer l'horaire"
           />
