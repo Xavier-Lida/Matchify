@@ -1,4 +1,4 @@
-export default function ScorerForm({ players = [], onChange, scores = {} }) {
+export default function ScorerForm({ players = [], onChange, scores = {}, cards = {}, onCardChange }) {
   return (
     <div className="flex flex-col gap-2">
       {players?.map((player) => (
@@ -14,6 +14,16 @@ export default function ScorerForm({ players = [], onChange, scores = {} }) {
             value={scores[player._id] || 0}
             onChange={onChange}
           />
+          <select
+            name={`card-${player._id}`}
+            className="select select-sm select-bordered w-24"
+            value={cards[player._id] || "none"}
+            onChange={onCardChange}
+          >
+            <option value="none">Aucun</option>
+            <option value="yellow">Jaune</option>
+            <option value="red">Rouge</option>
+          </select>
         </div>
       ))}
     </div>

@@ -39,12 +39,8 @@ export function calculateTeamStats(teamId, games) {
       const teamScore = isTeamA ? game.scoreA : game.scoreB;
       const oppScore = isTeamA ? game.scoreB : game.scoreA;
 
-      goalsFor += Array.isArray(game.goals)
-        ? game.goals.filter((g) => g.teamId === teamId).length
-        : 0;
-      goalsAgainst += Array.isArray(game.goals)
-        ? game.goals.filter((g) => g.teamId !== teamId).length
-        : 0;
+      goalsFor += teamScore;
+      goalsAgainst += oppScore;
 
       if (teamScore > oppScore) wins++;
       else if (teamScore < oppScore) losses++;

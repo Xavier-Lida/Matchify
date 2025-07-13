@@ -100,9 +100,8 @@ export default function Dashboard() {
       scoresB,
       playersA,
       playersB,
-      cardsA = {},
-      cardsB = {},
       goals = [],
+      cards,
     } = data;
 
     // 1. Update the match result
@@ -120,7 +119,8 @@ export default function Dashboard() {
           0
         ),
         status: "played",
-        goals, // <-- add the goals array here
+        goals,
+        cards,
       }),
     });
 
@@ -195,10 +195,26 @@ export default function Dashboard() {
                 : 0),
             0
           );
-          const yellowCards =
-            cardsA[player._id]?.yellow || cardsB[player._id]?.yellow || 0;
-          const redCards =
-            cardsA[player._id]?.red || cardsB[player._id]?.red || 0;
+          const yellowCards = allGames.reduce(
+            (sum, game) =>
+              sum +
+              (Array.isArray(game.cards)
+                ? game.cards.filter(
+                    (c) => c.playerId === player._id && c.type === "yellow"
+                  ).length
+                : 0),
+            0
+          );
+          const redCards = allGames.reduce(
+            (sum, game) =>
+              sum +
+              (Array.isArray(game.cards)
+                ? game.cards.filter(
+                    (c) => c.playerId === player._id && c.type === "red"
+                  ).length
+                : 0),
+            0
+          );
 
           await fetch(`/api/players`, {
             method: "PUT",

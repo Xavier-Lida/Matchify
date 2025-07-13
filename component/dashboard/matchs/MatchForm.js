@@ -14,53 +14,76 @@ export default function MatchForm({
 
   const [playersA, setPlayersA] = useState([]);
   const [playersB, setPlayersB] = useState([]);
+  const [scoresA, setScoresA] = useState({});
+  const [scoresB, setScoresB] = useState({});
+  const [cardsA, setCardsA] = useState({});
+  const [cardsB, setCardsB] = useState({});
 
+  // Load players and prefill scores/cards when match changes
   useEffect(() => {
-    if (selectedMatch) {
-      getPlayersByTeamId(selectedMatch.teamA).then(setPlayersA);
-      getPlayersByTeamId(selectedMatch.teamB).then(setPlayersB);
-
-      if (
-        selectedMatch.status === "played" &&
-        selectedMatch.goals &&
-        Array.isArray(selectedMatch.goals)
-      ) {
-        // Prefill logic as you have it
-        const scoresAInit = {};
-        selectedMatch.goals
-          .filter((g) => g.teamId === selectedMatch.teamA)
-          .forEach((g) => {
-            scoresAInit[g.playerId] = (scoresAInit[g.playerId] || 0) + 1;
-          });
-        const scoresBInit = {};
-        selectedMatch.goals
-          .filter((g) => g.teamId === selectedMatch.teamB)
-          .forEach((g) => {
-            scoresBInit[g.playerId] = (scoresBInit[g.playerId] || 0) + 1;
-          });
-        setScoresA(scoresAInit);
-        setScoresB(scoresBInit);
-      } else {
-        setScoresA({});
-        setScoresB({});
-      }
-    } else {
+    if (!selectedMatch) {
       setPlayersA([]);
       setPlayersB([]);
       setScoresA({});
       setScoresB({});
+      setCardsA({});
+      setCardsB({});
+      return;
+    }
+
+    getPlayersByTeamId(selectedMatch.teamA).then(setPlayersA);
+    getPlayersByTeamId(selectedMatch.teamB).then(setPlayersB);
+
+    // Prefill scores if match is played
+    if (
+      selectedMatch.status === "played" &&
+      Array.isArray(selectedMatch.goals)
+    ) {
+      const scoresAInit = {};
+      selectedMatch.goals
+        .filter((g) => g.teamId === selectedMatch.teamA)
+        .forEach((g) => {
+          scoresAInit[g.playerId] = (scoresAInit[g.playerId] || 0) + 1;
+        });
+      const scoresBInit = {};
+      selectedMatch.goals
+        .filter((g) => g.teamId === selectedMatch.teamB)
+        .forEach((g) => {
+          scoresBInit[g.playerId] = (scoresBInit[g.playerId] || 0) + 1;
+        });
+      setScoresA(scoresAInit);
+      setScoresB(scoresBInit);
+    } else {
+      setScoresA({});
+      setScoresB({});
+    }
+
+    // Prefill cards if match is played and has cards array
+    if (
+      selectedMatch.status === "played" &&
+      Array.isArray(selectedMatch.cards)
+    ) {
+      const cardsAInit = {};
+      const cardsBInit = {};
+      selectedMatch.cards.forEach((c) => {
+        if (c.teamId === selectedMatch.teamA) {
+          cardsAInit[c.playerId] = c.type;
+        } else if (c.teamId === selectedMatch.teamB) {
+          cardsBInit[c.playerId] = c.type;
+        }
+      });
+      setCardsA(cardsAInit);
+      setCardsB(cardsBInit);
+    } else {
+      setCardsA({});
+      setCardsB({});
     }
   }, [selectedMatchId, selectedMatch]);
 
-  const [scoresA, setScoresA] = useState({});
-  const [scoresB, setScoresB] = useState({});
-
+  // Handlers for input changes
   const handleChangeA = (e) => {
     const { name, value } = e.target;
-
-    // Extraire l'ID du joueur depuis le name, ex: "goals-123"
     const playerId = name.split("-")[1];
-
     setScoresA((prev) => ({
       ...prev,
       [playerId]: parseInt(value) || 0,
@@ -69,43 +92,71 @@ export default function MatchForm({
 
   const handleChangeB = (e) => {
     const { name, value } = e.target;
-
-    // Extraire l'ID du joueur depuis le name, ex: "goals-123"
     const playerId = name.split("-")[1];
-
     setScoresB((prev) => ({
       ...prev,
       [playerId]: parseInt(value) || 0,
     }));
   };
 
+  const handleCardChangeA = (e) => {
+    const { name, value } = e.target;
+    const playerId = name.split("-")[1];
+    setCardsA((prev) => ({
+      ...prev,
+      [playerId]: value,
+    }));
+  };
+
+  const handleCardChangeB = (e) => {
+    const { name, value } = e.target;
+    const playerId = name.split("-")[1];
+    setCardsB((prev) => ({
+      ...prev,
+      [playerId]: value,
+    }));
+  };
+
+  // Derived values
   const valueA = Object.values(scoresA).reduce((sum, val) => sum + val, 0);
   const valueB = Object.values(scoresB).reduce((sum, val) => sum + val, 0);
 
-  // For team A
+  // Prepare goals and cards for submission
   const scorersA = Object.entries(scoresA)
-    .filter(([playerId, count]) => count > 0)
+    .filter(([_, count]) => count > 0)
     .flatMap(([playerId, count]) =>
       Array.from({ length: count }, () => ({
         playerId,
         teamId: selectedMatch?.teamA,
       }))
     );
-
-  // For team B
   const scorersB = Object.entries(scoresB)
-    .filter(([playerId, count]) => count > 0)
+    .filter(([_, count]) => count > 0)
     .flatMap(([playerId, count]) =>
       Array.from({ length: count }, () => ({
         playerId,
         teamId: selectedMatch?.teamB,
       }))
     );
-
-  // Combine for the full goals array
   const goals = [...scorersA, ...scorersB];
+  const cards = [
+    ...Object.entries(cardsA)
+      .filter(([_, type]) => type !== "none")
+      .map(([playerId, type]) => ({
+        playerId,
+        teamId: selectedMatch?.teamA,
+        type,
+      })),
+    ...Object.entries(cardsB)
+      .filter(([_, type]) => type !== "none")
+      .map(([playerId, type]) => ({
+        playerId,
+        teamId: selectedMatch?.teamB,
+        type,
+      })),
+  ];
 
-  // Sort games chronologically (oldest first)
+  // Sort games chronologically
   const sortedGames = [...scheduledGames].sort(
     (a, b) => new Date(a.date) - new Date(b.date)
   );
@@ -114,25 +165,7 @@ export default function MatchForm({
     <form
       className="bg-white rounded-lg shadow-lg p-6 w-full max-w-2xl flex flex-col gap-4"
       onSubmit={(e) => {
-        // Build scorers array
-        const scorersA = Object.entries(scoresA)
-          .filter(([playerId, count]) => count > 0)
-          .flatMap(([playerId, count]) =>
-            Array.from({ length: count }, () => ({
-              playerId,
-              teamId: selectedMatch?.teamA,
-            }))
-          );
-        const scorersB = Object.entries(scoresB)
-          .filter(([playerId, count]) => count > 0)
-          .flatMap(([playerId, count]) =>
-            Array.from({ length: count }, () => ({
-              playerId,
-              teamId: selectedMatch?.teamB,
-            }))
-          );
-        const goals = [...scorersA, ...scorersB];
-
+        e.preventDefault();
         onSubmit(e, {
           selectedMatchId,
           scoresA,
@@ -140,10 +173,11 @@ export default function MatchForm({
           playersA,
           playersB,
           goals,
+          cards,
         });
       }}
     >
-      {/* Sélection du match */}
+      {/* Match selection */}
       <div>
         <label className="block mb-1 font-medium">Match</label>
         <select
@@ -168,7 +202,9 @@ export default function MatchForm({
       <div className="flex gap-4 items-end">
         <div className="flex-1">
           <label className="block mb-1 font-medium">
-            Score {selectedMatch?.teamA.name}
+            Score{" "}
+            {selectedMatch?.teamA &&
+              teams.find((t) => t._id === selectedMatch.teamA)?.name}
           </label>
           <input
             type="number"
@@ -182,7 +218,9 @@ export default function MatchForm({
         <span className="text-xl font-bold">-</span>
         <div className="flex-1">
           <label className="block mb-1 font-medium">
-            Score {selectedMatch?.teamB.name}
+            Score{" "}
+            {selectedMatch?.teamB &&
+              teams.find((t) => t._id === selectedMatch.teamB)?.name}
           </label>
           <input
             type="number"
@@ -195,42 +233,26 @@ export default function MatchForm({
         </div>
       </div>
 
-      {/* Buteurs */}
+      {/* Scorers and cards */}
       <div>
-        <label className="block mb-1 font-medium">Buteurs</label>
+        <label className="block mb-1 font-medium">Buteurs et cartons</label>
         <div className="flex justify-between">
           <ScorerForm
             players={playersA}
             onChange={handleChangeA}
             scores={scoresA}
+            cards={cardsA}
+            onCardChange={handleCardChangeA}
           />
           <ScorerForm
             players={playersB}
             onChange={handleChangeB}
             scores={scoresB}
+            cards={cardsB}
+            onCardChange={handleCardChangeB}
           />
         </div>
       </div>
-
-      {/* Cartons */}
-      {/* <div>
-        <label className="block mb-1 font-medium">Cartons</label>
-        {players?.map((player) => (
-          <div key={player._id} className="flex items-center gap-2 mb-2">
-            <select
-              name={`cards-${player._id}`}
-              className="select select-sm select-bordered w-32"
-            >
-              <option value="">Aucun</option>
-              <option value="yellow">🟨 Jaune</option>
-              <option value="red">🟥 Rouge</option>
-            </select>
-            <span>
-              {player.name} ({player.name})
-            </span>
-          </div>
-        ))}
-      </div> */}
 
       <div className="flex gap-2 mt-4">
         <button className="btn btn-success" type="submit">
