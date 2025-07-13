@@ -19,19 +19,41 @@ export default function MatchForm({
     if (selectedMatch) {
       getPlayersByTeamId(selectedMatch.teamA).then(setPlayersA);
       getPlayersByTeamId(selectedMatch.teamB).then(setPlayersB);
+
+      if (
+        selectedMatch.status === "played" &&
+        selectedMatch.goals &&
+        Array.isArray(selectedMatch.goals)
+      ) {
+        // Prefill logic as you have it
+        const scoresAInit = {};
+        selectedMatch.goals
+          .filter((g) => g.teamId === selectedMatch.teamA)
+          .forEach((g) => {
+            scoresAInit[g.playerId] = (scoresAInit[g.playerId] || 0) + 1;
+          });
+        const scoresBInit = {};
+        selectedMatch.goals
+          .filter((g) => g.teamId === selectedMatch.teamB)
+          .forEach((g) => {
+            scoresBInit[g.playerId] = (scoresBInit[g.playerId] || 0) + 1;
+          });
+        setScoresA(scoresAInit);
+        setScoresB(scoresBInit);
+      } else {
+        setScoresA({});
+        setScoresB({});
+      }
     } else {
       setPlayersA([]);
       setPlayersB([]);
+      setScoresA({});
+      setScoresB({});
     }
   }, [selectedMatchId, selectedMatch]);
 
   const [scoresA, setScoresA] = useState({});
   const [scoresB, setScoresB] = useState({});
-
-  useEffect(() => {
-    setScoresA({});
-    setScoresB({});
-  }, [selectedMatchId]);
 
   const handleChangeA = (e) => {
     const { name, value } = e.target;
@@ -83,6 +105,11 @@ export default function MatchForm({
   // Combine for the full goals array
   const goals = [...scorersA, ...scorersB];
 
+  // Sort games chronologically (oldest first)
+  const sortedGames = [...scheduledGames].sort(
+    (a, b) => new Date(a.date) - new Date(b.date)
+  );
+
   return (
     <form
       className="bg-white rounded-lg shadow-lg p-6 w-full max-w-2xl flex flex-col gap-4"
@@ -127,10 +154,11 @@ export default function MatchForm({
           required
         >
           <option value="">Sélectionner un match</option>
-          {scheduledGames.map((match) => (
+          {sortedGames.map((match) => (
             <option key={match._id} value={match._id}>
               {match.date} — {teams.find((t) => t._id === match.teamA).name} vs{" "}
               {teams.find((t) => t._id === match.teamB).name}
+              {match.status === "played" ? " (Terminé)" : ""}
             </option>
           ))}
         </select>
@@ -171,8 +199,16 @@ export default function MatchForm({
       <div>
         <label className="block mb-1 font-medium">Buteurs</label>
         <div className="flex justify-between">
-          <ScorerForm players={playersA} onChange={handleChangeA} />
-          <ScorerForm players={playersB} onChange={handleChangeB} />
+          <ScorerForm
+            players={playersA}
+            onChange={handleChangeA}
+            scores={scoresA}
+          />
+          <ScorerForm
+            players={playersB}
+            onChange={handleChangeB}
+            scores={scoresB}
+          />
         </div>
       </div>
 
