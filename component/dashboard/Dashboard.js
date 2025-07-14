@@ -149,10 +149,12 @@ export default function Dashboard() {
       let updateA = {
         ...statsA,
         points: statsA.wins * 3 + statsA.draws,
+        goalDifference: statsA.goalsFor - statsA.goalsAgainst,
       };
       let updateB = {
         ...statsB,
         points: statsB.wins * 3 + statsB.draws,
+        goalDifference: statsB.goalsFor - statsB.goalsAgainst,
       };
 
       // Update teamA
