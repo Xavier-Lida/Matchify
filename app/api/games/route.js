@@ -7,19 +7,34 @@ export async function POST(request) {
   try {
     const client = await clientPromise;
     const db = client.db();
-    const { games } = await request.json();
+    const data = await request.json();
 
-    if (!Array.isArray(games) || games.length === 0) {
-      return NextResponse.json(
-        { error: "Aucun match fourni." },
-        { status: 400 }
-      );
+    // Validate required fields
+    const requiredFields = [
+      "date",
+      "time",
+      "location",
+      "day",
+      "division",
+      "teamA",
+      "teamB",
+      "trimester",
+      "status",
+    ];
+    for (const field of requiredFields) {
+      if (!data[field]) {
+        return NextResponse.json(
+          { error: `Champ manquant: ${field}` },
+          { status: 400 }
+        );
+      }
     }
 
-    const result = await db.collection("games").insertMany(games);
+    // Insert the game
+    const result = await db.collection("games").insertOne(data);
     return NextResponse.json({
-      message: "Matchs insérés.",
-      insertedCount: result.insertedCount,
+      success: true,
+      insertedId: result.insertedId,
     });
   } catch (error) {
     console.error("POST /api/games:", error);
@@ -33,7 +48,13 @@ export async function GET() {
     const client = await clientPromise;
     const db = client.db();
 
-    const games = await db.collection("games").find().toArray();
+    // Sort by date ASC, then time ASC
+    const games = await db
+      .collection("games")
+      .find()
+      .sort({ date: 1, time: 1 })
+      .toArray();
+
     return NextResponse.json(games);
   } catch (error) {
     console.error("GET /api/games:", error);
@@ -108,4 +129,3 @@ export async function DELETE(request) {
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
   }
 }
-

@@ -86,7 +86,9 @@ export default function ScheduleForm({
           <ScheduleManu
             teams={teams}
             divisions={["1", "2", "3"]}
-            onSubmit={onSubmitManu}
+            onSubmit={() => {
+              // You can refresh games, show a message, etc.
+            }}
             submitLabel="Ajouter le match"
           />
           <div className="flex justify-end gap-2 mt-6">
