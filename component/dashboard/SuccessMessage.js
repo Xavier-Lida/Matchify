@@ -24,7 +24,7 @@ export default function SuccessMessage({ message }) {
         top: "80px",
         left: "50%",
         transform: "translateX(-50%)",
-        background: "#22c55e",
+        background: "#09A129",
         color: "white",
         padding: "12px 24px",
         borderRadius: "8px",

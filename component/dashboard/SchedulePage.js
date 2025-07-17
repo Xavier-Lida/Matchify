@@ -73,7 +73,7 @@ export default function SchedulePage() {
           </label>
           <select
             id="filter-trimestre"
-            className="select select-bordered w-full"
+            className="select select-bordered w-full bg-white"
             value={filterTrimester}
             onChange={(e) => setFilterTrimester(e.target.value)}
           >
@@ -92,7 +92,7 @@ export default function SchedulePage() {
           </label>
           <select
             id="filter-jour"
-            className="select select-bordered w-full"
+            className="select select-bordered w-full bg-white"
             value={filterJour}
             onChange={(e) => setFilterJour(e.target.value)}
           >
@@ -113,7 +113,7 @@ export default function SchedulePage() {
           </label>
           <select
             id="filter-equipe"
-            className="select select-bordered w-full"
+            className="select select-bordered w-full bg-white"
             value={filterEquipe}
             onChange={(e) => setFilterEquipe(e.target.value)}
           >
