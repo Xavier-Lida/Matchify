@@ -1,20 +1,25 @@
 import { useEffect, useState } from "react";
 import ScheduleAuto from "./ScheduleAuto";
-import ScheduleManu from "./ScheduleManu"; // <-- import the manual form
+import ScheduleManu from "./ScheduleManu";
+import ScheduleDelete from "./ScheduleDelete"; // Import the component
 
 export default function ScheduleForm({
   onSubmitAuto,
   onSubmitManu,
-  onSubmitEdit,
+  onDeleteGame,
   onCancel,
 }) {
   const [activeMode, setActiveMode] = useState(""); // "auto", "manu", "edit"
   const [teams, setTeams] = useState([]);
+  const [games, setGames] = useState([]);
 
   useEffect(() => {
     fetch("/api/teams")
       .then((res) => res.json())
       .then((data) => setTeams(data));
+    fetch("/api/games")
+      .then((res) => res.json())
+      .then((data) => setGames(data));
   }, []);
 
   // Handler for back arrow
@@ -27,22 +32,29 @@ export default function ScheduleForm({
       {activeMode === "" && (
         <div className="flex flex-col gap-3 mb-3">
           <button
-            className="btn btn-primary"
+            className="btn btn-warning"
             onClick={() => setActiveMode("auto")}
           >
             Générer automatiquement l'horaire
           </button>
           <button
-            className="btn btn-secondary"
+            className="btn btn-success"
             onClick={() => setActiveMode("manu")}
           >
             Générer manuellement l'horaire
           </button>
           <button
-            className="btn btn-accent"
+            className="btn btn-error"
             onClick={() => setActiveMode("edit")}
           >
-            Modifier l'horaire existant
+            Supprimer un match
+          </button>
+          <button
+            className="btn btn-neutral-content"
+            type="button"
+            onClick={onCancel}
+          >
+            Annuler
           </button>
         </div>
       )}
@@ -94,19 +106,16 @@ export default function ScheduleForm({
 
       {activeMode === "edit" && (
         <>
-          <form onSubmit={onSubmitEdit} className="flex flex-col gap-4">
-            <div>
-              <label className="block mb-1 font-medium">
-                Modifier l'horaire existant
-              </label>
-              {/* Add your edit schedule fields here */}
-            </div>
-            <div className="flex gap-2">
-              <button className="btn btn-info" type="submit">
-                Sauvegarder les modifications
-              </button>
-            </div>
-          </form>
+          <ScheduleDelete
+            games={games.map((game) => ({
+              ...game,
+              teamAName:
+                teams.find((t) => t._id === game.teamA)?.name || game.teamA,
+              teamBName:
+                teams.find((t) => t._id === game.teamB)?.name || game.teamB,
+            }))}
+            onDelete={onDeleteGame}
+          />
           <div className="flex justify-end gap-2">
             <button
               className="btn btn-ghost flex items-center"
