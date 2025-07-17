@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ScheduleAuto from "./ScheduleAuto";
+import ScheduleManu from "./ScheduleManu"; // <-- import the manual form
 
 export default function ScheduleForm({
   onSubmitAuto,
@@ -8,12 +9,19 @@ export default function ScheduleForm({
   onCancel,
 }) {
   const [activeMode, setActiveMode] = useState(""); // "auto", "manu", "edit"
+  const [teams, setTeams] = useState([]);
+
+  useEffect(() => {
+    fetch("/api/teams")
+      .then((res) => res.json())
+      .then((data) => setTeams(data));
+  }, []);
 
   // Handler for back arrow
   const handleBack = () => setActiveMode("");
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md flex flex-col">
+    <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md flex flex-col mt-15 mb-20">
       <h2 className="text-xl font-bold mb-2">Gestion de l'horaire</h2>
       {/* Main menu */}
       {activeMode === "" && (
@@ -42,7 +50,10 @@ export default function ScheduleForm({
       {/* Sub-menus with back arrow */}
       {activeMode === "auto" && (
         <>
-          <ScheduleAuto onSubmit={onSubmitAuto} submitLabel = "Générer l'horaire"/>
+          <ScheduleAuto
+            onSubmit={onSubmitAuto}
+            submitLabel="Générer l'horaire"
+          />
           <div className="flex justify-end">
             <button
               className="btn btn-ghost flex items-center"
@@ -60,19 +71,12 @@ export default function ScheduleForm({
 
       {activeMode === "manu" && (
         <>
-          <form onSubmit={onSubmitManu} className="flex flex-col gap-4">
-            <div>
-              <label className="block mb-1 font-medium">
-                Ajouter un match manuellement
-              </label>
-              {/* Add your manual match fields here */}
-            </div>
-            <div className="flex gap-2 mt-4">
-              <button className="btn btn-success" type="submit">
-                Ajouter manuellement
-              </button>
-            </div>
-          </form>
+          <ScheduleManu
+            teams={teams}
+            divisions={["1", "2", "3"]}
+            onSubmit={onSubmitManu}
+            submitLabel="Ajouter le match"
+          />
           <div className="flex justify-end gap-2 mt-6">
             <button
               className="btn btn-ghost flex items-center"
