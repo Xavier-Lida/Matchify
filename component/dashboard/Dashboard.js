@@ -9,11 +9,8 @@ import { generateSchedule } from "@/utils/generateSchedule";
 import { exportSchedule } from "@/utils/exportSchedule";
 import MatchForm from "./matchs/MatchForm";
 import { fetchGames } from "@/utils/api";
-import {
-  calculateGoalsFor,
-  calculateGoalsForPlayer,
-  calculateTeamStats,
-} from "@/utils/calculateGames";
+import { calculateTeamStats } from "@/utils/calculateGames";
+import SuccessMessage from "./SuccessMessage";
 
 export default function Dashboard() {
   const teamProps = {
@@ -31,12 +28,10 @@ export default function Dashboard() {
   };
   const [teams, setTeams] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [generateScheduleForm, setGenerateSchedule] = useState(false);
-  const [showAdd, setShowAdd] = useState(false);
   const [newTeam, setNewTeam] = useState(teamProps);
-  const [showMatchForm, setShowMatchForm] = useState(false);
   const [schedule, setSchedule] = useState([]);
   const [activeMenu, setActiveMenu] = useState(""); // "", "add", "schedule", "match"
+  const [successMessage, setSuccessMessage] = useState("");
 
   // Fetch teams from your API
   useEffect(() => {
@@ -55,17 +50,18 @@ export default function Dashboard() {
 
     loadSchedule();
   }, []);
+  // Handle team addition
   const handleAddTeam = async (e) => {
     e.preventDefault();
     await postTeam(newTeam);
-    // Refresh teams list
     const updated = await getTeams();
-    // Sort teams alphabetically by name
     updated.sort((a, b) => a.name.localeCompare(b.name));
     setTeams(updated);
-    setShowAdd(false);
+    setSuccessMessage("Équipe ajoutée avec succès !");
+    setTimeout(() => setSuccessMessage(""), 2000);
     setNewTeam(teamProps);
-    setCurrentIndex(updated.length - 1); // Select the new team
+    setCurrentIndex(updated.length - 1);
+    setActiveMenu("");
   };
 
   // Handle team deletion from TeamManager
@@ -83,11 +79,13 @@ export default function Dashboard() {
   // Handle schedule generation
   const handleGenerateSchedule = (e) => {
     e.preventDefault();
-    const formData = new FormData(e.target); // e.target est le formulaire
+    const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
     const schedule = generateSchedule(teams, data);
     exportSchedule(schedule);
-    setGenerateSchedule(false);
+    setSuccessMessage("Horaire généré !");
+    setTimeout(() => setSuccessMessage(""), 2000);
+    setActiveMenu("");
   };
 
   // Handle match entry
@@ -232,7 +230,9 @@ export default function Dashboard() {
       })
     );
 
-    setShowMatchForm(false);
+    setSuccessMessage("Match enregistré !");
+    setTimeout(() => setSuccessMessage(""), 2000);
+    setActiveMenu("");
   };
 
   const currentTeam = teams[currentIndex];
@@ -245,6 +245,7 @@ export default function Dashboard() {
         marginTop: "64px",
       }}
     >
+      <SuccessMessage message={successMessage} />
       <Sidebar
         teams={teams}
         selectedTeamId={currentTeam?._id}
