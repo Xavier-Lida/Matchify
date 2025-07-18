@@ -13,13 +13,17 @@ export default function ScheduleForm({
   const [teams, setTeams] = useState([]);
   const [games, setGames] = useState([]);
 
+  const fetchGames = () => {
+    fetch("/api/games")
+      .then((res) => res.json())
+      .then((data) => setGames(data));
+  };
+
   useEffect(() => {
     fetch("/api/teams")
       .then((res) => res.json())
       .then((data) => setTeams(data));
-    fetch("/api/games")
-      .then((res) => res.json())
-      .then((data) => setGames(data));
+    fetchGames();
   }, []);
 
   // Handler for back arrow
@@ -116,7 +120,7 @@ export default function ScheduleForm({
               teamBName:
                 teams.find((t) => t._id === game.teamB)?.name || game.teamB,
             }))}
-            onDelete={onDeleteGame}
+            onDelete={fetchGames}
           />
           <div className="flex justify-end gap-2">
             <button
