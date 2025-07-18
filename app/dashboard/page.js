@@ -1,4 +1,4 @@
-import { MY_EMAIL } from "@/constants";
+import { ADMIN_EMAILS } from "@/constants";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import TeamManager from "@/component/dashboard/TeamManager";
@@ -7,7 +7,11 @@ import Dashboard from "@/component/dashboard/Dashboard";
 export default async function DashboardPage() {
   const session = await auth();
 
-  if (!session || session.user?.email !== MY_EMAIL) {
+  if (
+    !session ||
+    !session.user?.email ||
+    !ADMIN_EMAILS.includes(session.user.email)
+  ) {
     redirect("/login");
   }
 

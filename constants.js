@@ -1,4 +1,4 @@
-export const MY_EMAIL = "lidaxavier2005@gmail.com"; // Replace with your email
+export const ADMIN_EMAILS = ["lidaxavier2005@gmail.com"]; // Replace with your email
 export const ROUTES = {
   HOMEPAGE: "/",
   SCHEDULE: "/horaire",
