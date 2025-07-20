@@ -25,6 +25,7 @@ export default function Dashboard() {
     goalsAgainst: 0,
     goalDifference: 0,
     logo: "",
+    coachEmail: "",
   };
   const [teams, setTeams] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);

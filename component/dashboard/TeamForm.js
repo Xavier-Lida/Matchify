@@ -34,14 +34,14 @@ export default function TeamForm({
         />
       </div>
       <div className="mb-3">
-        <label className="block mb-1 font-medium">Points</label>
+        <label className="block mb-1 font-medium">Email du coach</label>
         <input
-          name="points"
-          type="number"
-          value={form.points}
+          name="coachEmail"
+          type="email"
+          value={form.coachEmail || ""}
           onChange={onChange}
           className="input input-bordered w-full"
-          min={-5}
+          required
         />
       </div>
       <div className="mb-4">

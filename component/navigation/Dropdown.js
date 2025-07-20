@@ -1,13 +1,17 @@
 import { useState, useRef, useEffect } from "react";
 import NavigationButton from "./NavigationButton";
 import DashboardButton from "./DashboardButton";
+import CoachButton from "./CoachButton";
 import { ROUTES } from "@/constants";
+import { useSession } from "next-auth/react";
 
 export default function Dropdown() {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const { data: session, status } = useSession();
+  const [isCoach, setIsCoach] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     if (!open) return;
     function handleClickOutside(event) {
@@ -19,11 +23,70 @@ export default function Dropdown() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [open]);
 
-  // Helper to close dropdown and (optionally) do something else
+  useEffect(() => {
+    async function checkRoles() {
+      if (status === "authenticated" && session?.user?.email) {
+        // Check admin
+        const adminEmails = (await import("@/constants")).ADMIN_EMAILS;
+        setIsAdmin(adminEmails.includes(session.user.email));
+
+        // Check coach
+        if (!adminEmails.includes(session.user.email)) {
+          try {
+            const res = await fetch("/api/coaches");
+            const coachEmails = await res.json();
+            setIsCoach(coachEmails.includes(session.user.email));
+          } catch {
+            setIsCoach(false);
+          }
+        } else {
+          setIsCoach(true); // Admins are also considered coaches for menu
+        }
+      } else {
+        setIsCoach(false);
+        setIsAdmin(false);
+      }
+    }
+    checkRoles();
+  }, [session, status]);
+
   const handleMenuClick = (callback) => () => {
     setOpen(false);
     if (callback) callback();
   };
+
+  // Build menu items based on user role
+  const menuItems = [
+    <li key="schedule">
+      <NavigationButton
+        route={ROUTES.SCHEDULE}
+        name="Horaire"
+        onClick={handleMenuClick()}
+      />
+    </li>,
+    <li key="leaderboard">
+      <NavigationButton
+        route={ROUTES.LEADERBOARD}
+        name="Classement"
+        onClick={handleMenuClick()}
+      />
+    </li>,
+  ];
+
+  if (isCoach) {
+    menuItems.push(
+      <li key="coach">
+        <CoachButton onClick={handleMenuClick()} />
+      </li>
+    );
+  }
+  if (isAdmin) {
+    menuItems.push(
+      <li key="dashboard">
+        <DashboardButton onClick={handleMenuClick()} />
+      </li>
+    );
+  }
 
   return (
     <li className="relative dropdown dropdown-start" ref={dropdownRef}>
@@ -54,23 +117,7 @@ export default function Dropdown() {
       </button>
       {open && (
         <ul className="dropdown-content shadow menu bg-gray-50 rounded-box w-40 z-50 absolute left-0 mt-2">
-          <li>
-            <NavigationButton
-              route={ROUTES.SCHEDULE}
-              name="Horaire"
-              onClick={handleMenuClick()}
-            />
-          </li>
-          <li>
-            <NavigationButton
-              route={ROUTES.LEADERBOARD}
-              name="Classement"
-              onClick={handleMenuClick()}
-            />
-          </li>
-          <li>
-            <DashboardButton onClick={handleMenuClick()} />
-          </li>
+          {menuItems}
         </ul>
       )}
     </li>
