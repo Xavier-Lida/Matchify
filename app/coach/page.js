@@ -1,6 +1,7 @@
 import { ADMIN_EMAILS } from "@/constants";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
+import DashboardCoach from "@/component/dashboard/DashboardCoach";
 
 export default async function CoachDashboardPage() {
   const session = await auth();
@@ -25,7 +26,7 @@ export default async function CoachDashboardPage() {
 
   return (
     <div className="flex items-center justify-center min-h-screen">
-      {/* Coach dashboard content here */}
+      <DashboardCoach />
     </div>
   );
 }
