@@ -2,14 +2,23 @@
 import CoachCard from "./CoachCard";
 import PlayerForm from "./PlayerForm";
 import PlayerList from "./PlayerList";
+import GamesheetsMenu from "./GamesheetsMenu";
 import { useState, useEffect } from "react";
 import { cleanPlayers, sendPlayersToDb } from "@/utils/exportPlayers";
-import { getPlayersByTeamId, insertPlayers } from "@/utils/api";
+import {
+  insertPlayers,
+  getPlayersByTeamId,
+  fetchGames,
+  getTeams,
+} from "@/utils/api";
 
 export default function CoachManager({ team: initialTeam }) {
   const [showPlayers, setShowPlayers] = useState(false);
+  const [showGamesheets, setShowGamesheets] = useState(false);
   const [team, setTeam] = useState(initialTeam);
   const [players, setPlayers] = useState([]);
+  const [games, setGames] = useState([]);
+  const [teams, setTeams] = useState([]);
 
   // Sync local team state with prop changes
   useEffect(() => {
@@ -27,6 +36,23 @@ export default function CoachManager({ team: initialTeam }) {
     }
   }, [showPlayers, team._id]);
 
+  // Fetch games and teams when gamesheets menu is opened
+  useEffect(() => {
+    if (showGamesheets && team._id) {
+      async function fetchGamesAndTeams() {
+        const [allGames, allTeams] = await Promise.all([
+          fetchGames(),
+          getTeams(),
+        ]);
+        const teamGames = allGames.filter(
+          (g) => g.teamA === team._id || g.teamB === team._id
+        );
+        setGames(teamGames);
+        setTeams(allTeams);
+      }
+      fetchGamesAndTeams();
+    }
+  }, [showGamesheets, team._id]);
 
   // Save players changes
   const handleSavePlayers = async (players) => {
@@ -63,13 +89,25 @@ export default function CoachManager({ team: initialTeam }) {
 
   return (
     <>
-      <CoachCard team={team} players={() => setShowPlayers(true)}/>
+      <CoachCard
+        team={team}
+        players={() => setShowPlayers(true)}
+        print={() => setShowGamesheets(true)}
+      />
       <PlayerList players={players} />
       {showPlayers && (
         <PlayerForm
           players={players}
           onSave={handleSavePlayers}
           onClose={() => setShowPlayers(false)}
+        />
+      )}
+      {showGamesheets && (
+        <GamesheetsMenu
+          team={team}
+          games={games}
+          teams={teams}
+          onClose={() => setShowGamesheets(false)}
         />
       )}
     </>

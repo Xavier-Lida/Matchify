@@ -20,7 +20,7 @@ export default function CoachCard({ team, players, print }) {
           </button>
           <button
             className="btn btn-warning btn-sm"
-            onClick={() => print}
+            onClick={print}
           >
             Feuilles de match
           </button>
