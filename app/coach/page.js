@@ -26,7 +26,7 @@ export default async function CoachDashboardPage() {
 
   return (
     <div className="flex items-center justify-center min-h-screen">
-      <DashboardCoach />
+      <DashboardCoach userEmail={userEmail}/>
     </div>
   );
 }

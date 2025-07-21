@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import TeamManager from "./TeamManager";
+import CoachManager from "./CoachManager";
 import SuccessMessage from "./SuccessMessage";
 
 export default function DashboardCoach({ userEmail }) {
@@ -13,6 +13,7 @@ export default function DashboardCoach({ userEmail }) {
       try {
         const teamRes = await fetch(`/api/teams?coachEmail=${userEmail}`);
         const teams = await teamRes.json();
+        console.log(teams);
         if (teams.length > 0) {
           setTeam(teams[0]);
         } else {
@@ -24,17 +25,6 @@ export default function DashboardCoach({ userEmail }) {
     }
     if (userEmail) fetchTeam();
   }, [userEmail]);
-
-  // Handler for updating team info
-  const handleTeamUpdate = async () => {
-    if (team) {
-      const teamRes = await fetch(`/api/teams?coachEmail=${userEmail}`);
-      const teams = await teamRes.json();
-      setTeam(teams[0]);
-      setSuccess("Équipe mise à jour !");
-      setTimeout(() => setSuccess(""), 2000);
-    }
-  };
 
   if (!team) {
     return (
@@ -54,9 +44,8 @@ export default function DashboardCoach({ userEmail }) {
           Tableau de bord Coach
         </h2>
         {success && <SuccessMessage message={success} />}
-        <TeamManager
+        <CoachManager
           team={team}
-          onUpdate={handleTeamUpdate}
           isCoachView={true}
         />
       </div>

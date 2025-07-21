@@ -7,11 +7,16 @@ export async function GET(request) {
     const client = await clientPromise;
     const db = client.db();
     // Sort teams alphabetically by name in MongoDB
-    const teams = await db
-      .collection("teams")
-      .find({})
-      .sort({ name: 1 })
-      .toArray();
+    const { searchParams } = new URL(request.url);
+    const coachEmail = searchParams.get("coachEmail");
+
+    let teams;
+    if (coachEmail) {
+      teams = await db.collection("teams").find({ coachEmail }).toArray();
+    } else {
+      teams = await db.collection("teams").find({}).sort({ name: 1 }).toArray();
+    }
+
     return NextResponse.json(teams);
   } catch (error) {
     console.error("GET /api/teams:", error);
