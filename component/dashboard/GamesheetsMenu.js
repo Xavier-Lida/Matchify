@@ -1,15 +1,15 @@
 import { useState } from "react";
 
-export default function GamesheetsMenu({ team, games, teams, onClose }) {
+export default function GamesheetsMenu({
+  team,
+  games,
+  teams,
+  players,
+  onClose,
+}) {
   const [selectedGameId, setSelectedGameId] = useState("");
 
   const selectedGame = games.find((g) => g._id === selectedGameId);
-
-  const handlePrint = () => {
-    if (!selectedGame) return;
-    // You can replace this with your actual print logic
-    window.print();
-  };
 
   // Get the opponent's name for the game
   const getOpponentName = (game) => {
@@ -17,6 +17,26 @@ export default function GamesheetsMenu({ team, games, teams, onClose }) {
     const opponentId = game.teamA === team._id ? game.teamB : game.teamA;
     const opponent = teams.find((t) => t._id === opponentId);
     return opponent ? opponent.name : opponentId;
+  };
+
+  // Find opponent object for selectedGame
+  const opponent =
+    selectedGame &&
+    teams.find(
+      (t) =>
+        t._id ===
+        (selectedGame.teamA === team._id
+          ? selectedGame.teamB
+          : selectedGame.teamA)
+    );
+
+  // Open the PDF in a new tab
+  const handleServerPrint = () => {
+    if (!selectedGame) return;
+    window.open(
+      `/api/gamesheet-pdf?gameId=${selectedGame._id}&teamId=${team._id}`,
+      "_blank"
+    );
   };
 
   return (
@@ -72,7 +92,7 @@ export default function GamesheetsMenu({ team, games, teams, onClose }) {
           )}
           <button
             className="btn btn-primary w-full"
-            onClick={handlePrint}
+            onClick={handleServerPrint}
             disabled={!selectedGameId}
           >
             Imprimer la feuille de match

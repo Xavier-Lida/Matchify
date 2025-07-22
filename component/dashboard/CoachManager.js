@@ -107,6 +107,7 @@ export default function CoachManager({ team: initialTeam }) {
           team={team}
           games={games}
           teams={teams}
+          players={players}
           onClose={() => setShowGamesheets(false)}
         />
       )}
