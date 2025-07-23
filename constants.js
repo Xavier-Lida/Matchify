@@ -1,4 +1,7 @@
-export const ADMIN_EMAILS = ["lidaxavier2005@gmail.com"];
+export const ADMIN_EMAILS = [
+  "lidaxavier2005@gmail.com",
+  "andre.thomasmultisports@gmail.com",
+];
 export const ROUTES = {
   HOMEPAGE: "/",
   SCHEDULE: "/horaire",
