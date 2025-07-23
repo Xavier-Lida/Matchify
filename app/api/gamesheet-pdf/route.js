@@ -40,8 +40,12 @@ export async function GET(request) {
     return NextResponse.json({ error: "Opponent not found" }, { status: 404 });
   }
 
-  // Fetch players for the team
-  const players = await db.collection("players").find({ teamId }).toArray();
+  // Fetch players for the team, sorted alphabetically by lastName then firstName
+  const players = await db
+    .collection("players")
+    .find({ teamId })
+    .sort({ lastName: 1, firstName: 1 })
+    .toArray();
   if (!players) {
     return NextResponse.json({ error: "Players not found" }, { status: 404 });
   }

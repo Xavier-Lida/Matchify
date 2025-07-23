@@ -8,7 +8,12 @@ export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const teamId = searchParams.get("teamId");
   const filter = teamId ? { teamId } : {};
-  const players = await db.collection("players").find(filter).toArray();
+  // Sort players by lastName, then firstName
+  const players = await db
+    .collection("players")
+    .find(filter)
+    .sort({ lastName: 1, firstName: 1 })
+    .toArray();
   return NextResponse.json(players);
 }
 
