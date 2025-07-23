@@ -36,17 +36,52 @@ export async function GET(request) {
   const opponent = await db
     .collection("teams")
     .findOne({ _id: new ObjectId(opponentId) });
+  if (!opponent) {
+    return NextResponse.json({ error: "Opponent not found" }, { status: 404 });
+  }
 
   // Fetch players for the team
   const players = await db.collection("players").find({ teamId }).toArray();
+  if (!players) {
+    return NextResponse.json({ error: "Players not found" }, { status: 404 });
+  }
+
+  if (!game || !team || !opponent || !players) {
+    return NextResponse.json(
+      { error: "Missing data for PDF" },
+      { status: 400 }
+    );
+  }
+
+  function sanitize(obj) {
+    if (!obj) return obj;
+    const result = {};
+    for (const key in obj) {
+      if (
+        typeof obj[key] === "object" &&
+        obj[key] !== null &&
+        obj[key].toString
+      ) {
+        result[key] = obj[key].toString();
+      } else {
+        result[key] = obj[key];
+      }
+    }
+    return result;
+  }
+
+  const safeGame = sanitize(game);
+  const safeTeam = sanitize(team);
+  const safeOpponent = sanitize(opponent);
+  const safePlayers = players.map(sanitize);
 
   // Prepare the PDF document
   const doc = (
     <GamesheetDocument
-      game={game}
-      team={team}
-      opponent={opponent}
-      players={players}
+      game={safeGame}
+      team={safeTeam}
+      opponent={safeOpponent}
+      players={safePlayers}
     />
   );
   const pdfBuffer = await pdf(doc).toBuffer();
