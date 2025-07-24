@@ -89,7 +89,7 @@ export default function GamesheetDocument({ game, team, opponent, players }) {
               </Text>
               <Text style={styles.cellName}>{(p.firstName || "") + (p.lastName ? " " + p.lastName : "")}</Text>
               <Text style={styles.cellCartons}>{p.yellowCard ? "X" : ""}{p.redCard ? " X" : ""}</Text>
-              <Text style={styles.cellButs}>{p.goals || ""}</Text>
+              <Text style={styles.cellButs}></Text>
             </View>
           ))}
         </View>

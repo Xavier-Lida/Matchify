@@ -39,7 +39,7 @@ export default function DashboardCoach({ userEmail }) {
 
   return (
     <div className="flex items-center justify-center min-h-screen">
-      <div className="bg-white rounded-lg shadow-lg p-8 max-w-2xl w-full">
+      <div className="bg-white rounded-lg shadow-lg p-8 max-w-2xl w-full mt-20">
         <h2 className="text-2xl font-bold mb-6 text-center">
           Tableau de bord Coach
         </h2>
