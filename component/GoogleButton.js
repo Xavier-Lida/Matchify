@@ -6,7 +6,7 @@ import { ROUTES } from "@/constants";
 export default function GoogleButton() {
   return (
     <button
-      onClick={() => signIn("google", { callbackUrl: ROUTES.HOMEPAGE })}
+      onClick={() => signIn("google", { callbackUrl: ROUTES.SCHEDULE })}
       className="btn bg-white text-black border-[#e5e5e5] w-full"
     >
       <svg
