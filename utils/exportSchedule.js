@@ -3,38 +3,34 @@ export async function exportSchedule(schedule) {
     throw new Error("Le calendrier est vide ou invalide.");
   }
 
-  try {
-    // 1. Supprimer les anciens matchs planifiés
-    const deleteRes = await fetch("/api/games?status=scheduled", {
-      method: "DELETE",
-    });
+  // schedule is an array of games
+  let successCount = 0;
+  let errorCount = 0;
+  let errors = [];
 
-    if (!deleteRes.ok) {
-      const errorText = await deleteRes.text();
-      throw new Error(`Erreur lors de la suppression : ${deleteRes.status} — ${errorText}`);
+  for (const game of schedule) {
+    try {
+      const res = await fetch("/api/games", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(game),
+      });
+      if (res.ok) {
+        successCount++;
+      } else {
+        errorCount++;
+        const err = await res.json();
+        errors.push(err.error || "Erreur inconnue");
+      }
+    } catch (e) {
+      errorCount++;
+      errors.push(e.message);
     }
-
-    console.log("🗑 Ancien calendrier supprimé.");
-
-    // 2. Insérer le nouvel horaire
-    const insertRes = await fetch("/api/games", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ games: schedule }),
-    });
-
-    if (!insertRes.ok) {
-      const errorText = await insertRes.text();
-      throw new Error(`Erreur d'insertion : ${insertRes.status} — ${errorText}`);
-    }
-
-    const result = await insertRes.json();
-    console.log("✅ Nouveau calendrier exporté avec succès :", result);
-    return result;
-  } catch (error) {
-    console.error("❌ Erreur dans exportSchedule :", error);
-    throw error;
   }
+
+  return {
+    successCount,
+    errorCount,
+    errors,
+  };
 }

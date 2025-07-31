@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import ScheduleAuto from "./ScheduleAuto";
 import ScheduleManu from "./ScheduleManu";
-import ScheduleDelete from "./ScheduleDelete"; // Import the component
+import ScheduleDelete from "./ScheduleDelete";
+import { generateSchedule } from "@/utils/generateSchedule";
+import { exportSchedule } from "@/utils/exportSchedule";
 
 export default function ScheduleForm({
   onSubmitAuto,

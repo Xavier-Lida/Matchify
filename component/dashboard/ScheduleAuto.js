@@ -37,6 +37,20 @@ export default function ScheduleAuto({
         </p>
       </div>
 
+      <div className="mb-3">
+        <label className="block mb-1 font-medium">Trimestre</label>
+        <select
+          name="trimester"
+          className="select select-bordered w-full"
+          required
+        >
+          <option value="">Sélectionner le trimestre</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+        </select>
+      </div>
+
       <div className="flex gap-2 mt-4">
         <button className="btn btn-warning w-full" type="submit">
           {submitLabel}
