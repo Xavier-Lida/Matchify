@@ -236,7 +236,7 @@ export default function MatchForm({
       {/* Scorers and cards */}
       <div>
         <label className="block mb-1 font-medium">Buteurs et cartons</label>
-        <div className="flex justify-between">
+        <div className="flex gap-8">
           <ScorerForm
             players={playersA}
             onChange={handleChangeA}
