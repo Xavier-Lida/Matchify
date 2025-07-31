@@ -69,6 +69,8 @@ export default function Dashboard() {
   const handleTeamDeleted = (deletedId) => {
     const updatedTeams = teams.filter((t) => t._id !== deletedId);
     setTeams(updatedTeams);
+    setSuccessMessage("Équipe supprimée avec succès !");
+    setTimeout(() => setSuccessMessage(""), 2000);
     // Adjust currentIndex if needed
     if (updatedTeams.length === 0) {
       setCurrentIndex(0);
@@ -231,7 +233,7 @@ export default function Dashboard() {
       })
     );
 
-    setSuccessMessage("Match enregistré !");
+    setSuccessMessage("Match modifié avec succès !");
     setTimeout(() => setSuccessMessage(""), 2000);
     setActiveMenu("");
   };
