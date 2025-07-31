@@ -21,7 +21,22 @@ export default function ScheduleManu({
   const [error, setError] = useState("");
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    let newForm = { ...form, [name]: value };
+
+    // If day is not a number, set trimester to "Finales"
+    if (name === "day") {
+      if (isNaN(Number(value)) && value !== "") {
+        newForm.trimester = "Finales";
+      } else {
+        // If day is a number, reset trimester if it was "Finales"
+        if (form.trimester === "Finales") {
+          newForm.trimester = "";
+        }
+      }
+    }
+
+    setForm(newForm);
   };
 
   // Filter teams by selected division
@@ -179,12 +194,41 @@ export default function ScheduleManu({
             value={form.trimester}
             onChange={handleChange}
             required
+            disabled={["quart de finale", "demi-finale", "finale"].includes(
+              form.day
+            )}
           >
             <option value="">Sélectionner le trimestre</option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
+            <option
+              value="1"
+              disabled={["quart de finale", "demi-finale", "finale"].includes(
+                form.day
+              )}
+            >
+              1
+            </option>
+            <option
+              value="2"
+              disabled={["quart de finale", "demi-finale", "finale"].includes(
+                form.day
+              )}
+            >
+              2
+            </option>
+            <option
+              value="3"
+              disabled={["quart de finale", "demi-finale", "finale"].includes(
+                form.day
+              )}
+            >
+              3
+            </option>
+            <option
+              value="Finales"
+              disabled={!isNaN(Number(form.day)) && form.day !== ""}
+            >
+              Finales
+            </option>
           </select>
         </div>
       </div>
