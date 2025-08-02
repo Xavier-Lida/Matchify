@@ -7,8 +7,7 @@ import { exportSchedule } from "@/utils/exportSchedule";
 
 export default function ScheduleForm({
   onSubmitAuto,
-  onSubmitManu,
-  onDeleteGame,
+  setSchedule,
   onCancel,
 }) {
   const [activeMode, setActiveMode] = useState(""); // "auto", "manu", "edit"
@@ -122,6 +121,9 @@ export default function ScheduleForm({
               teamBName:
                 teams.find((t) => t._id === game.teamB)?.name || game.teamB,
             }))}
+            teams={teams}
+            setTeams={setTeams}
+            setSchedule={setSchedule}
             onDelete={fetchGames}
           />
           <div className="flex justify-end gap-2">

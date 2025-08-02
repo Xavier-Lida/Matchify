@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import SuccessMessage from "./SuccessMessage"; // Adjust path if needed
+import SuccessMessage from "./SuccessMessage";
+import { refreshResults } from "@/utils/refreshResults"; // Adjust path if needed
 
 const statusMap = {
   scheduled: "À venir",
@@ -9,7 +10,13 @@ const statusMap = {
   // Add more if needed
 };
 
-export default function ScheduleDelete({ games = [], onDelete, fetchTeams }) {
+export default function ScheduleDelete({
+  games = [],
+  onDelete,
+  fetchTeams,
+  setTeams,
+  setSchedule,
+}) {
   const [selectedGameId, setSelectedGameId] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -33,7 +40,12 @@ export default function ScheduleDelete({ games = [], onDelete, fetchTeams }) {
         setSelectedGameId("");
         setSuccess(true);
         if (onDelete) onDelete(selectedGameId);
-        if (fetchTeams) fetchTeams(); // Refetch teams after delete
+        if (fetchTeams) fetchTeams();
+
+        // Refresh results if a played game was deleted
+        if (selectedGame?.status === "played" && setTeams && setSchedule) {
+          await refreshResults({ setTeams, setSchedule });
+        }
       } catch (err) {
         setError(err.message || "Erreur inconnue.");
       }

@@ -9,8 +9,8 @@ import { generateSchedule } from "@/utils/generateSchedule";
 import { exportSchedule } from "@/utils/exportSchedule";
 import MatchForm from "./matchs/MatchForm";
 import { fetchGames } from "@/utils/api";
-import { calculateTeamStats } from "@/utils/calculateGames";
 import SuccessMessage from "./SuccessMessage";
+import { refreshResults } from "@/utils/refreshResults";
 
 export default function Dashboard() {
   const teamProps = {
@@ -125,113 +125,8 @@ export default function Dashboard() {
       }),
     });
 
-    // 2. Refetch the updated schedule
-    const updatedSchedule = await fetchGames();
-    setSchedule(Object.values(updatedSchedule));
-
-    // 3. Now calculate team stats from the updated schedule
-    const teamA = teams.find((t) =>
-      playersA.length > 0 ? t._id === playersA[0].teamId : false
-    );
-    const teamB = teams.find((t) =>
-      playersB.length > 0 ? t._id === playersB[0].teamId : false
-    );
-
-    if (teamA && teamB) {
-      const statsA = calculateTeamStats(
-        teamA._id,
-        Object.values(updatedSchedule)
-      );
-      const statsB = calculateTeamStats(
-        teamB._id,
-        Object.values(updatedSchedule)
-      );
-
-      let updateA = {
-        ...statsA,
-        points: statsA.wins * 3 + statsA.draws,
-        goalDifference: statsA.goalsFor - statsA.goalsAgainst,
-      };
-      let updateB = {
-        ...statsB,
-        points: statsB.wins * 3 + statsB.draws,
-        goalDifference: statsB.goalsFor - statsB.goalsAgainst,
-      };
-
-      // Update teamA
-      await fetch(`/api/teams`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...teamA, ...updateA }),
-      });
-
-      // Update teamB
-      await fetch(`/api/teams`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...teamB, ...updateB }),
-      });
-    }
-
-    // 3. Update player stats for players in the match, using the goals array
-    const playedTeamIds = [
-      ...(teamA ? [teamA._id] : []),
-      ...(teamB ? [teamB._id] : []),
-    ];
-
-    await Promise.all(
-      [...playersA, ...playersB].map(async (player) => {
-        if (playedTeamIds.includes(player.teamId)) {
-          // Calculate total goals for this player in all played games (including this one)
-          const allGames = schedule
-            .map((g) =>
-              g._id === selectedMatchId
-                ? { ...g, goals, status: "played" } // update the current match with new goals
-                : g
-            )
-            .filter((g) => g.status === "played" && g.goals);
-          const goalsCount = allGames.reduce(
-            (sum, game) =>
-              sum +
-              (Array.isArray(game.goals)
-                ? game.goals.filter((g) => g.playerId === player._id).length
-                : 0),
-            0
-          );
-          const yellowCards = allGames.reduce(
-            (sum, game) =>
-              sum +
-              (Array.isArray(game.cards)
-                ? game.cards.filter(
-                    (c) => c.playerId === player._id && c.type === "yellow"
-                  ).length
-                : 0),
-            0
-          );
-          const redCards = allGames.reduce(
-            (sum, game) =>
-              sum +
-              (Array.isArray(game.cards)
-                ? game.cards.filter(
-                    (c) => c.playerId === player._id && c.type === "red"
-                  ).length
-                : 0),
-            0
-          );
-
-          await fetch(`/api/players`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              _id: player._id,
-              goals: goalsCount, // total goals for this player
-              yellowCards, // just the increment (or update as needed)
-              redCards, // just the increment (or update as needed)
-            }),
-          });
-        }
-      })
-    );
+    // 2. Refresh all results and stats for ALL teams and players
+    await refreshResults({ setTeams, setSchedule });
 
     setSuccessMessage("Match modifié avec succès !");
     setTimeout(() => setSuccessMessage(""), 2000);
@@ -275,6 +170,7 @@ export default function Dashboard() {
         {activeMenu === "schedule" && (
           <ScheduleForm
             onSubmitAuto={(e) => handleGenerateSchedule(e)}
+            setSchedule={setSchedule}
             onCancel={() => setActiveMenu("")}
             submitLabel="Gérer l'horaire"
           />
