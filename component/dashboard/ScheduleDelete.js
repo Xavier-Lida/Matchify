@@ -1,14 +1,7 @@
 import { useState, useEffect } from "react";
 import SuccessMessage from "./SuccessMessage";
-import { refreshResults } from "@/utils/refreshResults"; // Adjust path if needed
-
-const statusMap = {
-  scheduled: "À venir",
-  played: "Joué",
-  cancelled: "Annulé",
-  postponed: "Reporté",
-  // Add more if needed
-};
+import { refreshResults } from "@/utils/refreshResults";
+import { refreshScorers } from "@/utils/refreshScorers";
 
 export default function ScheduleDelete({
   games = [],
@@ -45,6 +38,7 @@ export default function ScheduleDelete({
         // Refresh results if a played game was deleted
         if (selectedGame?.status === "played" && setTeams && setSchedule) {
           await refreshResults({ setTeams, setSchedule });
+          await refreshScorers(); // <-- Refresh scorers after results
         }
       } catch (err) {
         setError(err.message || "Erreur inconnue.");

@@ -53,7 +53,7 @@ export async function deleteTeam(teamId) {
 }
 export async function fetchGames() {
   try {
-    const url = new URL('/api/games', 'http://localhost:3000');
+    const url = new URL("/api/games", "http://localhost:3000");
     const response = await fetch(url);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -61,7 +61,7 @@ export async function fetchGames() {
     const gamesData = await response.json();
     return gamesData;
   } catch (error) {
-    console.error('Error fetching games:', error);
+    console.error("Error fetching games:", error);
     return [];
   }
 }
@@ -76,6 +76,19 @@ export async function insertPlayers(players) {
     return data.insertedPlayers || [];
   } catch (error) {
     console.error("Error inserting players:", error);
+    throw error;
+  }
+}
+export async function getPlayers() {
+  try {
+    const response = await fetch("/api/players");
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error fetching players:", error);
     throw error;
   }
 }

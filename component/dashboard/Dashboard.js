@@ -11,6 +11,7 @@ import MatchForm from "./matchs/MatchForm";
 import { fetchGames } from "@/utils/api";
 import SuccessMessage from "./SuccessMessage";
 import { refreshResults } from "@/utils/refreshResults";
+import { refreshScorers } from "@/utils/refreshScorers";
 
 export default function Dashboard() {
   const teamProps = {
@@ -33,6 +34,7 @@ export default function Dashboard() {
   const [schedule, setSchedule] = useState([]);
   const [activeMenu, setActiveMenu] = useState(""); // "", "add", "schedule", "match"
   const [successMessage, setSuccessMessage] = useState("");
+  const [scorers, setScorers] = useState([]);
 
   // Fetch teams from your API
   useEffect(() => {
@@ -127,6 +129,7 @@ export default function Dashboard() {
 
     // 2. Refresh all results and stats for ALL teams and players
     await refreshResults({ setTeams, setSchedule });
+    await refreshScorers();
 
     setSuccessMessage("Match modifié avec succès !");
     setTimeout(() => setSuccessMessage(""), 2000);
