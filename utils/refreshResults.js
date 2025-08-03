@@ -7,7 +7,13 @@ import { calculatePlayerStats } from "@/utils/calculateResults";
  * @param {Function} setTeams - Setter for teams state.
  * @param {Function} setSchedule - Setter for schedule state.
  */
-export async function refreshResults({ setTeams, setSchedule }) {
+export async function refreshResults({
+  selectedMatchId,
+  goals,
+  cards,
+  setTeams,
+  setSchedule,
+}) {
   // 1. Refetch the updated schedule
   const updatedSchedule = await fetchGames();
   const scheduleArr = Object.values(updatedSchedule);
@@ -40,22 +46,39 @@ export async function refreshResults({ setTeams, setSchedule }) {
       const stats = calculatePlayerStats(
         player,
         scheduleArr,
-        null, // no need for selectedMatchId, recalculate for all
-        [],
-        []
+        selectedMatchId,
+        goals,
+        cards
       );
       await fetch(`/api/players`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           _id: player._id,
-          ...stats,
+          goals: stats.goals,
+          yellowCards: stats.yellowCards,
+          redCards: stats.redCards,
         }),
       });
     })
   );
 
-  // 5. Update teams state in UI
+  // 5. Update match details for the played game
+  const { scoreA, scoreB } = goals;
+  await fetch(`/api/games`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      _id: selectedMatchId,
+      scoreA,
+      scoreB,
+      status: "played",
+      goals,
+      cards, // <-- Make sure this is included!
+    }),
+  });
+
+  // 6. Update teams state in UI
   const updatedTeams = await getTeams();
   updatedTeams.sort((a, b) => a.name.localeCompare(b.name));
   setTeams(updatedTeams);

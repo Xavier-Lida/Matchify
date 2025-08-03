@@ -12,6 +12,7 @@ import { fetchGames } from "@/utils/api";
 import SuccessMessage from "./SuccessMessage";
 import { refreshResults } from "@/utils/refreshResults";
 import { refreshScorers } from "@/utils/refreshScorers";
+import { calculateSuspensions } from "@/utils/calculateSusupensions";
 
 export default function Dashboard() {
   const teamProps = {
@@ -127,8 +128,31 @@ export default function Dashboard() {
       }),
     });
 
-    // 2. Refresh all results and stats for ALL teams and players
-    await refreshResults({ setTeams, setSchedule });
+    // 2. Fetch current suspensions (you may need to adjust this API call)
+    const suspensionsRes = await fetch("/api/suspensions");
+    const currentSuspensions = await suspensionsRes.json();
+
+    // 3. Calculate new suspensions for both teams' players
+    const newSuspensions = calculateSuspensions(
+      [...playersA, ...playersB],
+      cards,
+      currentSuspensions,
+      selectedMatchId
+    );
+
+    // 4. Create new suspensions in the database
+    await Promise.all(
+      newSuspensions.map((suspension) =>
+        fetch("/api/suspensions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(suspension),
+        })
+      )
+    );
+
+    // 5. Refresh all results and stats for ALL teams and players
+    await refreshResults({ selectedMatchId, goals, cards, setTeams, setSchedule });
     await refreshScorers();
 
     setSuccessMessage("Match modifié avec succès !");

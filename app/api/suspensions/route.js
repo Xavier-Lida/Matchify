@@ -1,6 +1,21 @@
 import clientPromise from "@/libs/mongo";
 import { NextResponse } from "next/server";
+import { ObjectId } from "mongodb";
 
+// GET endpoint: returns all suspensions as JSON array
+export async function GET() {
+  try {
+    const client = await clientPromise;
+    const db = client.db();
+    const suspensions = await db.collection("suspensions").find({}).toArray();
+    return NextResponse.json(suspensions);
+  } catch (error) {
+    console.error("GET /api/suspensions:", error);
+    return NextResponse.json([], { status: 500 });
+  }
+}
+
+// POST endpoint: creates a new suspension
 export async function POST(request) {
   try {
     const client = await clientPromise;
@@ -36,6 +51,24 @@ export async function POST(request) {
     });
   } catch (error) {
     console.error("POST /api/suspensions:", error);
+    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+  }
+}
+
+// DELETE endpoint: removes a suspension by id
+export async function DELETE(request) {
+  try {
+    const client = await clientPromise;
+    const db = client.db();
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+    if (!id) {
+      return NextResponse.json({ error: "Missing id" }, { status: 400 });
+    }
+    await db.collection("suspensions").deleteOne({ id });
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("DELETE /api/suspensions:", error);
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
   }
 }

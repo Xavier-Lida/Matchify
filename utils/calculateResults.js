@@ -41,5 +41,5 @@ export function calculatePlayerStats(
     0
   );
 
-  return { goals: goalsCount, yellowCards, redCards };
+  return { goals: goalsCount, yellowCards: yellowCards, redCards: redCards }; 
 }
