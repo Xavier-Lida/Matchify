@@ -15,7 +15,6 @@ export function calculateSuspensions(
   const newSuspensions = [];
 
   players.forEach((player) => {
-    // Count yellow and red cards for this player
     const yellowCardsThisMatch = cards.filter(
       (card) => card.playerId === player._id && card.type === "yellow"
     ).length;
@@ -26,12 +25,10 @@ export function calculateSuspensions(
       (card) => card.playerId === player._id && card.type === "red"
     ).length;
 
-    // Get cumulative yellow/red cards from player object
     const totalYellow = player.yellowCards || 0;
     const totalRed = player.redCards || 0;
 
     // --- YELLOW CARD SUSPENSIONS ---
-    // 2 yellow cards in the same match
     if (twoYellowCardsThisMatch) {
       newSuspensions.push({
         player_id: player._id,
@@ -42,8 +39,6 @@ export function calculateSuspensions(
       return;
     }
 
-    // 3 yellow cards in 3 different matches (cumulative)
-    // After first suspension, next is at 2, then at 1 (series logic)
     let yellowThreshold = 3;
     if (player.yellowSeriesStep === 1) yellowThreshold = 2;
     if (player.yellowSeriesStep === 2) yellowThreshold = 1;
@@ -54,13 +49,11 @@ export function calculateSuspensions(
         start_match_id: matchId,
         matches_remaining: 1,
       });
-      // You should update player.yellowSeriesStep after suspension is served
       return;
     }
 
     // --- RED CARD SUSPENSIONS ---
     if (redCardsThisMatch > 0) {
-      // 1st red card
       if (totalRed === 1) {
         newSuspensions.push({
           player_id: player._id,
@@ -70,7 +63,6 @@ export function calculateSuspensions(
         });
         return;
       }
-      // 2nd red card
       if (totalRed === 2) {
         newSuspensions.push({
           player_id: player._id,
@@ -80,13 +72,12 @@ export function calculateSuspensions(
         });
         return;
       }
-      // 3rd red card
       if (totalRed >= 3) {
         newSuspensions.push({
           player_id: player._id,
           reason: "3ème carton rouge direct - exclusion saison",
           start_match_id: matchId,
-          matches_remaining: 99, // Use a high number for exclusion
+          matches_remaining: 99,
         });
         return;
       }

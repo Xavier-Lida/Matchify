@@ -74,7 +74,6 @@ export async function refreshResults({
       scoreB,
       status: "played",
       goals,
-      cards, // <-- Make sure this is included!
     }),
   });
 

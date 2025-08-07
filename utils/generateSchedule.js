@@ -68,7 +68,6 @@ export function generateSchedule(teams, data) {
                 scoreA: null,
                 scoreB: null,
                 goals: [],
-                cards: [],
               });
 
               slotFound = true;

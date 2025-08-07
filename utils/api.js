@@ -92,3 +92,9 @@ export async function getPlayers() {
     throw error;
   }
 }
+
+export async function getCardsByMatchId(matchId) {
+  const res = await fetch(`/api/cards?matchId=${matchId}`);
+  if (!res.ok) return [];
+  return res.json();
+}

@@ -1,39 +1,64 @@
 import { getPlayers, fetchGames } from "@/utils/api";
 import { calculateSuspensions } from "@/utils/calculateSusupensions";
+import { updateSuspensionTime } from "@/utils/calculateSuspensionTime";
 
 /**
  * Refreshes the goals and cards for all players in the league,
  * updates their stats in the database, and calculates suspensions if needed.
+ * Also updates suspension time for all players of the teams involved in the last match.
  */
 export async function refreshScorers() {
-  console.log("refreshScorers called");
   const players = await getPlayers();
-  console.log("Players fetched:", players.length);
   const schedule = Object.values(await fetchGames());
 
   if (!players || players.length === 0) return;
 
+  const playedGames = schedule.filter((game) => game.status === "played");
+  const lastGame = playedGames[playedGames.length - 1];
+
+  // Update suspension time for all players of both teams in the last match
+  if (lastGame && lastGame.teamA && lastGame.teamB) {
+    await updateSuspensionTime(lastGame.teamA);
+    await updateSuspensionTime(lastGame.teamB);
+  }
+
   await Promise.all(
     players.map(async (player) => {
       try {
-        const playedGames = schedule.filter((game) => game.status === "played");
+        // Fetch current suspensions for this player
+        const suspensionsRes = await fetch(
+          `/api/suspensions?player_id=${player._id}`
+        );
+        const currentSuspensions = suspensionsRes.ok
+          ? await suspensionsRes.json()
+          : [];
 
-        // Get all cards for this player in the last played game
-        const lastGame = playedGames[playedGames.length - 1];
-        const lastGameCards =
-          lastGame && Array.isArray(lastGame.cards)
-            ? lastGame.cards.filter((c) => c.playerId === player._id)
-            : [];
+        // Find the latest suspension match for this player
+        const lastSuspensionMatchId = currentSuspensions.length
+          ? currentSuspensions.reduce((latest, s) => {
+              if (!latest) return s.start_match_id;
+              return s.start_match_id > latest ? s.start_match_id : latest;
+            }, null)
+          : null;
 
-        // Only log lastGame.cards for debugging
-        console.log("lastGame.cards:", lastGame && lastGame.cards);
+        // Gather all cards for this player from matches after last suspension
+        const allPlayerCards = playedGames
+          .filter(
+            (game) =>
+              !lastSuspensionMatchId || game._id > lastSuspensionMatchId
+          )
+          .flatMap((game) => (Array.isArray(game.cards) ? game.cards : []))
+          .filter((card) => card.playerId === player._id);
 
+        // Calculate stats as before
         const yellowCards = playedGames.reduce(
           (sum, game) =>
             sum +
             (Array.isArray(game.cards)
               ? game.cards.filter(
-                  (c) => c.playerId === player._id && c.type === "yellow"
+                  (c) =>
+                    c.playerId === player._id &&
+                    (c.type === "yellow" || c.type === "yellow/red")
                 ).length
               : 0),
           0
@@ -71,26 +96,14 @@ export async function refreshScorers() {
           }),
         });
 
-        // Fetch current suspensions for this player
-        const suspensionsRes = await fetch(
-          `/api/suspensions?player_id=${player._id}`
-        );
-        const currentSuspensions = suspensionsRes.ok
-          ? await suspensionsRes.json()
-          : [];
-
         const updatedPlayer = { ...player, yellowCards, redCards };
-        // Gather all cards for this player from all played games
-        const allPlayerCards = playedGames
-          .flatMap((game) => (Array.isArray(game.cards) ? game.cards : []))
-          .filter((card) => card.playerId === player._id);
 
-        // Calculate suspensions using all cards
+        // Calculate suspensions using only new cards
         const newSuspensions = calculateSuspensions(
           [updatedPlayer],
           allPlayerCards,
           currentSuspensions,
-          playedGames.length ? playedGames[playedGames.length - 1]._id : null // or pass null if not needed
+          playedGames.length ? playedGames[playedGames.length - 1]._id : null
         );
 
         // Find suspensions that should be removed (active but not needed anymore)
@@ -119,6 +132,7 @@ export async function refreshScorers() {
           )
         );
       } catch (err) {
+        // Only log errors
         console.error("Error updating player or suspensions:", player._id, err);
       }
     })

@@ -31,6 +31,7 @@ export default function ScorerForm({
           >
             <option value="none">Aucun</option>
             <option value="yellow">Jaune</option>
+            <option value="yellow/red">Jaune/Rouge</option>
             <option value="red">Rouge</option>
           </select>
         </div>

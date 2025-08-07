@@ -35,7 +35,6 @@ export default function Dashboard() {
   const [schedule, setSchedule] = useState([]);
   const [activeMenu, setActiveMenu] = useState(""); // "", "add", "schedule", "match"
   const [successMessage, setSuccessMessage] = useState("");
-  const [scorers, setScorers] = useState([]);
 
   // Fetch teams from your API
   useEffect(() => {
@@ -108,31 +107,35 @@ export default function Dashboard() {
       cards,
     } = data;
 
-    // 1. Update the match result
+    // 1. POST each card to the cards API and collect their IDs
+    await Promise.all(
+      (cards || []).map(async (card) => {
+        await fetch("/api/cards", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(card),
+        });
+      })
+    );
+
+    // 2. Update the match result, WITHOUT referencing card IDs
+    const updatedGame = {
+      _id: selectedMatchId,
+      scoreA: Object.values(scoresA).reduce((sum, val) => sum + (val || 0), 0),
+      scoreB: Object.values(scoresB).reduce((sum, val) => sum + (val || 0), 0),
+      status: "played",
+      goals,
+    };
+
     await fetch(`/api/games`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        _id: selectedMatchId,
-        scoreA: Object.values(scoresA).reduce(
-          (sum, val) => sum + (val || 0),
-          0
-        ),
-        scoreB: Object.values(scoresB).reduce(
-          (sum, val) => sum + (val || 0),
-          0
-        ),
-        status: "played",
-        goals,
-        cards,
-      }),
+      body: JSON.stringify(updatedGame),
     });
 
-    // 2. Fetch current suspensions (you may need to adjust this API call)
     const suspensionsRes = await fetch("/api/suspensions");
     const currentSuspensions = await suspensionsRes.json();
 
-    // 3. Calculate new suspensions for both teams' players
     const newSuspensions = calculateSuspensions(
       [...playersA, ...playersB],
       cards,
@@ -140,7 +143,6 @@ export default function Dashboard() {
       selectedMatchId
     );
 
-    // 4. Create new suspensions in the database
     await Promise.all(
       newSuspensions.map((suspension) =>
         fetch("/api/suspensions", {
@@ -151,8 +153,13 @@ export default function Dashboard() {
       )
     );
 
-    // 5. Refresh all results and stats for ALL teams and players
-    await refreshResults({ selectedMatchId, goals, cards, setTeams, setSchedule });
+    await refreshResults({
+      selectedMatchId,
+      goals,
+      cards,
+      setTeams,
+      setSchedule,
+    });
     await refreshScorers();
 
     setSuccessMessage("Match modifié avec succès !");
@@ -196,7 +203,7 @@ export default function Dashboard() {
         )}
         {activeMenu === "schedule" && (
           <ScheduleForm
-            onSubmitAuto={(e) => handleGenerateSchedule(e)}
+            onSubmitAuto={handleGenerateSchedule}
             setSchedule={setSchedule}
             onCancel={() => setActiveMenu("")}
             submitLabel="Gérer l'horaire"
@@ -205,7 +212,7 @@ export default function Dashboard() {
         {activeMenu === "match" && (
           <MatchForm
             teams={teams}
-            onSubmit={(e, data) => handleMatchEntry(e, data)}
+            onSubmit={handleMatchEntry}
             onCancel={() => setActiveMenu("")}
             submitLabel="Entrer un match"
             scheduledGames={schedule && schedule.length > 0 ? schedule : []}

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getPlayersByTeamId } from "@/utils/api";
+import { getPlayersByTeamId, getCardsByMatchId } from "@/utils/api";
 import ScorerForm from "./ScorerForm";
 
 export default function MatchForm({
@@ -31,9 +31,14 @@ export default function MatchForm({
       return;
     }
 
-    getPlayersByTeamId(selectedMatch.teamA).then(setPlayersA);
-    getPlayersByTeamId(selectedMatch.teamB).then(setPlayersB);
-
+    // Fetch players for both teams
+    Promise.all([
+      getPlayersByTeamId(selectedMatch.teamA),
+      getPlayersByTeamId(selectedMatch.teamB),
+    ]).then(([playersAData, playersBData]) => {
+      setPlayersA(playersAData);
+      setPlayersB(playersBData);
+    });
     // Prefill scores if match is played
     if (
       selectedMatch.status === "played" &&
@@ -59,21 +64,20 @@ export default function MatchForm({
     }
 
     // Prefill cards if match is played and has cards array
-    if (
-      selectedMatch.status === "played" &&
-      Array.isArray(selectedMatch.cards)
-    ) {
-      const cardsAInit = {};
-      const cardsBInit = {};
-      selectedMatch.cards.forEach((c) => {
-        if (c.teamId === selectedMatch.teamA) {
-          cardsAInit[c.playerId] = c.type;
-        } else if (c.teamId === selectedMatch.teamB) {
-          cardsBInit[c.playerId] = c.type;
-        }
+    if (selectedMatch._id) {
+      getCardsByMatchId(selectedMatch._id).then((cards) => {
+        const cardsAInit = {};
+        const cardsBInit = {};
+        cards.forEach((c) => {
+          if (c.teamId === selectedMatch.teamA) {
+            cardsAInit[c.playerId] = c.type;
+          } else if (c.teamId === selectedMatch.teamB) {
+            cardsBInit[c.playerId] = c.type;
+          }
+        });
+        setCardsA(cardsAInit);
+        setCardsB(cardsBInit);
       });
-      setCardsA(cardsAInit);
-      setCardsB(cardsBInit);
     } else {
       setCardsA({});
       setCardsB({});
@@ -144,15 +148,17 @@ export default function MatchForm({
       .filter(([_, type]) => type !== "none")
       .map(([playerId, type]) => ({
         playerId,
-        teamId: selectedMatch?.teamA,
         type,
+        matchId: selectedMatch?._id,
+        used: false,
       })),
     ...Object.entries(cardsB)
       .filter(([_, type]) => type !== "none")
       .map(([playerId, type]) => ({
         playerId,
-        teamId: selectedMatch?.teamB,
         type,
+        matchId: selectedMatch?._id,
+        used: false,
       })),
   ];
 
@@ -190,8 +196,9 @@ export default function MatchForm({
           <option value="">Sélectionner un match</option>
           {sortedGames.map((match) => (
             <option key={match._id} value={match._id}>
-              {match.date} — {teams.find((t) => t._id === match.teamA).name} vs{" "}
-              {teams.find((t) => t._id === match.teamB).name}
+              {match.date} —{" "}
+              {teams.find((t) => t._id === match.teamA)?.name || "Équipe A"} vs{" "}
+              {teams.find((t) => t._id === match.teamB)?.name || "Équipe B"}
               {match.status === "played" ? " (Terminé)" : ""}
             </option>
           ))}
