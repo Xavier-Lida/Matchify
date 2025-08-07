@@ -146,7 +146,9 @@ export default function MatchForm({
       }))
     );
   const goals = [...scorersA, ...scorersB];
-  const cards = [
+
+  // Build cards array as before
+  const rawCards = [
     ...Object.entries(cardsA)
       .filter(([_, type]) => type !== "none")
       .map(([playerId, type]) => ({
@@ -164,6 +166,13 @@ export default function MatchForm({
         used: false,
       })),
   ];
+
+  // Deduplicate: keep only the latest card for each playerId
+  const cardsMap = new Map();
+  rawCards.forEach((card) => {
+    cardsMap.set(card.playerId, card); // overwrites previous, so latest wins
+  });
+  const cards = Array.from(cardsMap.values());
 
   // Sort games chronologically
   const sortedGames = [...scheduledGames].sort(

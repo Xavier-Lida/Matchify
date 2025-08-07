@@ -13,6 +13,10 @@ export async function refreshScorers() {
 
   if (!players || players.length === 0) return;
 
+  // Fetch all cards for all played games
+  const cardsRes = await fetch("/api/cards");
+  const allCards = cardsRes.ok ? await cardsRes.json() : [];
+
   const playedGames = schedule.filter((game) => game.status === "played");
   const lastGame = playedGames[playedGames.length - 1];
 
@@ -42,38 +46,23 @@ export async function refreshScorers() {
           : null;
 
         // Gather all cards for this player from matches after last suspension
-        const allPlayerCards = playedGames
+        const allPlayerCards = allCards
           .filter(
-            (game) =>
-              !lastSuspensionMatchId || game._id > lastSuspensionMatchId
-          )
-          .flatMap((game) => (Array.isArray(game.cards) ? game.cards : []))
-          .filter((card) => card.playerId === player._id);
+            (card) =>
+              card.playerId === player._id &&
+              (!lastSuspensionMatchId || card.matchId > lastSuspensionMatchId)
+          );
 
         // Calculate stats as before
-        const yellowCards = playedGames.reduce(
-          (sum, game) =>
-            sum +
-            (Array.isArray(game.cards)
-              ? game.cards.filter(
-                  (c) =>
-                    c.playerId === player._id &&
-                    (c.type === "yellow" || c.type === "yellow/red")
-                ).length
-              : 0),
-          0
-        );
+        const yellowCards = allCards.filter(
+          (c) =>
+            c.playerId === player._id &&
+            (c.type === "yellow" || c.type === "yellow/red")
+        ).length;
 
-        const redCards = playedGames.reduce(
-          (sum, game) =>
-            sum +
-            (Array.isArray(game.cards)
-              ? game.cards.filter(
-                  (c) => c.playerId === player._id && c.type === "red"
-                ).length
-              : 0),
-          0
-        );
+        const redCards = allCards.filter(
+          (c) => c.playerId === player._id && c.type === "red"
+        ).length;
 
         const goalsCount = playedGames.reduce(
           (sum, game) =>
@@ -96,13 +85,9 @@ export async function refreshScorers() {
           }),
         });
 
-        const updatedPlayer = { ...player, yellowCards, redCards };
-
         // Calculate suspensions using only new cards
         const newSuspensions = calculateSuspensions(
-          [updatedPlayer],
           allPlayerCards,
-          currentSuspensions,
           playedGames.length ? playedGames[playedGames.length - 1]._id : null
         );
 

@@ -17,40 +17,35 @@ export async function GET() {
 
 // POST endpoint: creates a new card
 export async function POST(request) {
-  try {
-    const client = await clientPromise;
-    const db = client.db();
-    const data = await request.json();
+  const client = await clientPromise;
+  const db = client.db();
+  const card = await request.json();
 
-    // Validate required fields
-    const requiredFields = [
-      "playerId",
-      "type",
-      "matchId"
-    ];
-    for (const field of requiredFields) {
-      if (!data[field]) {
-        return NextResponse.json(
-          { error: `Champ manquant: ${field}` },
-          { status: 400 }
-        );
-      }
-    }
+  // Check if a card for this player in this match already exists
+  const existing = await db.collection("cards").findOne({
+    playerId: card.playerId,
+    matchId: card.matchId,
+  });
 
-    // Add used flag if not present
-    if (typeof data.used === "undefined") {
-      data.used = false;
-    }
-
-    const result = await db.collection("cards").insertOne(data);
+  if (existing) {
+    // Optionally: update the existing card with the new type/used value
+    await db.collection("cards").updateOne(
+      { _id: existing._id },
+      { $set: { type: card.type, used: card.used } }
+    );
+    return NextResponse.json({
+      success: true,
+      updated: true,
+      card: { ...existing, type: card.type, used: card.used },
+    });
+  } else {
+    // Insert new card
+    const result = await db.collection("cards").insertOne(card);
     return NextResponse.json({
       success: true,
       insertedId: result.insertedId,
-      card: data,
+      card: { ...card, _id: result.insertedId },
     });
-  } catch (error) {
-    console.error("POST /api/cards:", error);
-    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
   }
 }
 

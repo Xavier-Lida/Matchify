@@ -1,51 +1,47 @@
 /**
- * Calculates suspensions for players based on cards and creates suspension objects if needed.
- * @param {Array} players - Array of player objects.
- * @param {Array} cards - Array of card objects for the last game (each with playerId and type).
- * @param {Array} currentSuspensions - Array of current suspension objects.
+ * Calculates suspensions based on cards, marks used cards, and creates suspension objects if needed.
+ * @param {Array} cards - Array of card objects for the last game (each with playerId, type, used).
  * @param {String} matchId - The ID of the last game.
  * @returns {Array} Array of new suspension objects to be created.
  */
-export function calculateSuspensions(
-  players,
-  cards,
-  currentSuspensions,
-  matchId
-) {
+export function calculateSuspensions(cards, matchId) {
   const newSuspensions = [];
+  const usedCardIds = new Set();
 
-  players.forEach((player) => {
-    const yellowCardsThisMatch = cards.filter(
-      (card) => card.playerId === player._id && card.type === "yellow"
-    ).length;
-    const twoYellowCardsThisMatch = cards.filter(
-      (card) => card.playerId === player._id && card.type === "yellow/red"
-    ).length;
-    const redCardsThisMatch = cards.filter(
-      (card) => card.playerId === player._id && card.type === "red"
-    ).length;
+  // Group cards by playerId
+  const cardsByPlayer = {};
+  cards.forEach((card) => {
+    if (!card.used) {
+      if (!cardsByPlayer[card.playerId]) cardsByPlayer[card.playerId] = [];
+      cardsByPlayer[card.playerId].push(card);
+    }
+  });
 
-    const totalYellow = player.yellowCards || 0;
-    const totalRed = player.redCards || 0;
+  Object.entries(cardsByPlayer).forEach(([playerId, playerCards]) => {
+    const yellowCards = playerCards.filter((c) => c.type === "yellow");
+    const yellowRedCards = playerCards.filter((c) => c.type === "yellow/red");
+    const redCards = playerCards.filter((c) => c.type === "red");
 
-    // --- YELLOW CARD SUSPENSIONS ---
-    if (twoYellowCardsThisMatch) {
+    // --- 2 YELLOW CARDS IN SAME MATCH (yellow/red) ---
+    if (yellowRedCards.length > 0) {
+      yellowRedCards.forEach((card) => usedCardIds.add(card._id));
       newSuspensions.push({
-        player_id: player._id,
+        player_id: playerId,
         reason: "2 cartons jaunes dans le même match",
         start_match_id: matchId,
         matches_remaining: 1,
       });
+      // Mark all yellow cards as used too (if needed)
+      yellowCards.forEach((card) => usedCardIds.add(card._id));
       return;
     }
 
-    let yellowThreshold = 3;
-    if (player.yellowSeriesStep === 1) yellowThreshold = 2;
-    if (player.yellowSeriesStep === 2) yellowThreshold = 1;
-    if (totalYellow >= yellowThreshold) {
+    // --- 3 YELLOW CARDS CUMULATED ---
+    if (yellowCards.length >= 3) {
+      yellowCards.slice(0, 3).forEach((card) => usedCardIds.add(card._id));
       newSuspensions.push({
-        player_id: player._id,
-        reason: `${yellowThreshold} cartons jaunes cumulés`,
+        player_id: playerId,
+        reason: "3 cartons jaunes cumulés",
         start_match_id: matchId,
         matches_remaining: 1,
       });
@@ -53,34 +49,22 @@ export function calculateSuspensions(
     }
 
     // --- RED CARD SUSPENSIONS ---
-    if (redCardsThisMatch > 0) {
-      if (totalRed === 1) {
-        newSuspensions.push({
-          player_id: player._id,
-          reason: "1 carton rouge direct",
-          start_match_id: matchId,
-          matches_remaining: 1,
-        });
-        return;
-      }
-      if (totalRed === 2) {
-        newSuspensions.push({
-          player_id: player._id,
-          reason: "2ème carton rouge direct",
-          start_match_id: matchId,
-          matches_remaining: 5,
-        });
-        return;
-      }
-      if (totalRed >= 3) {
-        newSuspensions.push({
-          player_id: player._id,
-          reason: "3ème carton rouge direct - exclusion saison",
-          start_match_id: matchId,
-          matches_remaining: 99,
-        });
-        return;
-      }
+    if (redCards.length > 0) {
+      redCards.forEach((card) => usedCardIds.add(card._id));
+      newSuspensions.push({
+        player_id: playerId,
+        reason: "1 carton rouge direct",
+        start_match_id: matchId,
+        matches_remaining: 1,
+      });
+      return;
+    }
+  });
+
+  // Mark cards as used
+  cards.forEach((card) => {
+    if (usedCardIds.has(card._id)) {
+      card.used = true;
     }
   });
 
