@@ -31,57 +31,60 @@ export default function MatchForm({
       return;
     }
 
-    // Fetch players for both teams
+    // Fetch players for both teams, then fetch cards and assign to teams
     Promise.all([
       getPlayersByTeamId(selectedMatch.teamA),
       getPlayersByTeamId(selectedMatch.teamB),
     ]).then(([playersAData, playersBData]) => {
       setPlayersA(playersAData);
       setPlayersB(playersBData);
-    });
-    // Prefill scores if match is played
-    if (
-      selectedMatch.status === "played" &&
-      Array.isArray(selectedMatch.goals)
-    ) {
-      const scoresAInit = {};
-      selectedMatch.goals
-        .filter((g) => g.teamId === selectedMatch.teamA)
-        .forEach((g) => {
-          scoresAInit[g.playerId] = (scoresAInit[g.playerId] || 0) + 1;
-        });
-      const scoresBInit = {};
-      selectedMatch.goals
-        .filter((g) => g.teamId === selectedMatch.teamB)
-        .forEach((g) => {
-          scoresBInit[g.playerId] = (scoresBInit[g.playerId] || 0) + 1;
-        });
-      setScoresA(scoresAInit);
-      setScoresB(scoresBInit);
-    } else {
-      setScoresA({});
-      setScoresB({});
-    }
 
-    // Prefill cards if match is played and has cards array
-    if (selectedMatch._id) {
-      getCardsByMatchId(selectedMatch._id).then((cards) => {
-        const cardsAInit = {};
-        const cardsBInit = {};
-        cards.forEach((c) => {
-          if (c.teamId === selectedMatch.teamA) {
-            cardsAInit[c.playerId] = c.type;
-          } else if (c.teamId === selectedMatch.teamB) {
-            cardsBInit[c.playerId] = c.type;
-          }
+      // Prefill scores if match is played
+      if (
+        selectedMatch.status === "played" &&
+        Array.isArray(selectedMatch.goals)
+      ) {
+        const scoresAInit = {};
+        selectedMatch.goals
+          .filter((g) => g.teamId === selectedMatch.teamA)
+          .forEach((g) => {
+            scoresAInit[g.playerId] = (scoresAInit[g.playerId] || 0) + 1;
+          });
+        const scoresBInit = {};
+        selectedMatch.goals
+          .filter((g) => g.teamId === selectedMatch.teamB)
+          .forEach((g) => {
+            scoresBInit[g.playerId] = (scoresBInit[g.playerId] || 0) + 1;
+          });
+        setScoresA(scoresAInit);
+        setScoresB(scoresBInit);
+      } else {
+        setScoresA({});
+        setScoresB({});
+      }
+
+      // Now fetch cards and assign to the correct team
+      if (selectedMatch._id) {
+        getCardsByMatchId(selectedMatch._id).then((cards) => {
+          const cardsAInit = {};
+          const cardsBInit = {};
+          const playersAIds = new Set(playersAData.map((p) => p._id));
+          const playersBIds = new Set(playersBData.map((p) => p._id));
+          cards.forEach((c) => {
+            if (playersAIds.has(c.playerId)) {
+              cardsAInit[c.playerId] = c.type;
+            } else if (playersBIds.has(c.playerId)) {
+              cardsBInit[c.playerId] = c.type;
+            }
+          });
+          setCardsA(cardsAInit);
+          setCardsB(cardsBInit);
         });
-        setCardsA(cardsAInit);
-        setCardsB(cardsBInit);
-      });
-    } else {
-      setCardsA({});
-      setCardsB({});
-    }
+      } else {
+        setCardsA({});
+        setCardsB({});
+      }
+    });
   }, [selectedMatchId, selectedMatch]);
 
   // Handlers for input changes
