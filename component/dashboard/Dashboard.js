@@ -167,6 +167,15 @@ export default function Dashboard() {
     setActiveMenu("");
   };
 
+  const handleResetSuccess = async () => {
+    setSuccessMessage("Match réinitialisé !");
+    setTimeout(() => setSuccessMessage(""), 2000);
+    // Refresh the schedule from the backend
+    const updatedGames = await fetchGames();
+    setSchedule(Object.values(updatedGames));
+    setActiveMenu(""); // Optionally close the form
+  };
+
   const currentTeam = teams[currentIndex];
 
   return (
@@ -216,6 +225,7 @@ export default function Dashboard() {
             onCancel={() => setActiveMenu("")}
             submitLabel="Entrer un match"
             scheduledGames={schedule && schedule.length > 0 ? schedule : []}
+            onResetSuccess={handleResetSuccess}
           />
         )}
         {currentTeam && activeMenu === "" ? (

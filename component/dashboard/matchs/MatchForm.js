@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { getPlayersByTeamId, getCardsByMatchId } from "@/utils/api";
+import { resetMatch } from "@/utils/resetMatch"; // <-- Import your resetMatch function
 import ScorerForm from "./ScorerForm";
 
 export default function MatchForm({
@@ -8,6 +9,7 @@ export default function MatchForm({
   onCancel,
   submitLabel = "",
   scheduledGames,
+  onResetSuccess, // <-- Add prop for reset success handler
 }) {
   const [selectedMatchId, setSelectedMatchId] = useState("");
   const selectedMatch = scheduledGames.find((m) => m._id === selectedMatchId);
@@ -179,6 +181,17 @@ export default function MatchForm({
     (a, b) => new Date(a.date) - new Date(b.date)
   );
 
+  // Add a handler for resetting the match
+  const handleResetMatch = async () => {
+    if (!selectedMatchId) return;
+    await resetMatch(selectedMatchId);
+    setScoresA({});
+    setScoresB({});
+    setCardsA({});
+    setCardsB({});
+    if (onResetSuccess) onResetSuccess(); // <-- call parent handler
+  };
+
   return (
     <form
       className="bg-white rounded-lg shadow-lg p-6 w-full max-w-2xl flex flex-col gap-4"
@@ -276,6 +289,14 @@ export default function MatchForm({
       <div className="flex gap-2 mt-4">
         <button className="btn btn-success" type="submit">
           {submitLabel}
+        </button>
+        <button
+          className="btn btn-warning"
+          type="button"
+          onClick={handleResetMatch}
+          disabled={!selectedMatchId}
+        >
+          Réinitialiser
         </button>
         <button className="btn btn-ghost" type="button" onClick={onCancel}>
           Annuler

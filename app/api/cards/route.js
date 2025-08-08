@@ -78,18 +78,13 @@ export async function PUT(request) {
 
 // DELETE endpoint: removes a card by id
 export async function DELETE(request) {
-  try {
-    const client = await clientPromise;
-    const db = client.db();
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get("id");
-    if (!id) {
-      return NextResponse.json({ error: "Missing id" }, { status: 400 });
-    }
-    await db.collection("cards").deleteOne({ id });
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error("DELETE /api/cards:", error);
-    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+  const url = new URL(request.url);
+  const matchId = url.searchParams.get("matchId");
+  if (!matchId) {
+    return NextResponse.json({ error: "matchId required" }, { status: 400 });
   }
+  const client = await clientPromise;
+  const db = client.db();
+  await db.collection("cards").deleteMany({ matchId });
+  return NextResponse.json({ success: true });
 }
