@@ -33,6 +33,10 @@ export default function MatchForm({
       return;
     }
 
+    // Always clear cards state immediately when match changes
+    setCardsA({});
+    setCardsB({});
+
     // Fetch players for both teams, then fetch cards and assign to teams
     Promise.all([
       getPlayersByTeamId(selectedMatch.teamA),
@@ -72,19 +76,18 @@ export default function MatchForm({
           const cardsBInit = {};
           const playersAIds = new Set(playersAData.map((p) => p._id));
           const playersBIds = new Set(playersBData.map((p) => p._id));
-          cards.forEach((c) => {
-            if (playersAIds.has(c.playerId)) {
-              cardsAInit[c.playerId] = c.type;
-            } else if (playersBIds.has(c.playerId)) {
-              cardsBInit[c.playerId] = c.type;
-            }
-          });
+          cards
+            .filter((c) => c.matchId === selectedMatch._id) // <-- Only use cards for this match
+            .forEach((c) => {
+              if (playersAIds.has(c.playerId)) {
+                cardsAInit[c.playerId] = c.type;
+              } else if (playersBIds.has(c.playerId)) {
+                cardsBInit[c.playerId] = c.type;
+              }
+            });
           setCardsA(cardsAInit);
           setCardsB(cardsBInit);
         });
-      } else {
-        setCardsA({});
-        setCardsB({});
       }
     });
   }, [selectedMatchId, selectedMatch]);
