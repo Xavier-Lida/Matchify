@@ -1,6 +1,3 @@
-import { calculateSuspensions } from "@/utils/calculateSusupensions";
-import { getPlayers } from "@/utils/api";
-
 /**
  * Resets a match to its default state and deletes all cards related to that match.
  * @param {string} matchId - The ID of the match to reset.
@@ -28,18 +25,5 @@ export async function resetMatch(matchId) {
     method: "DELETE",
   });
 
-  // 3. Recalculate suspensions for all players (or just for this match if you want)
-  // Fetch all cards and players
-  const cardsRes = await fetch("/api/cards");
-  const allCards = cardsRes.ok ? await cardsRes.json() : [];
-  const players = await getPlayers();
-
-  // Optionally, recalculate for all matches/players
-  // (You may want to loop through all matches and call calculateSuspensions for each)
-  // Here, we just call it for the current match (should result in no suspensions after reset)
-  calculateSuspensions(
-    allCards.filter((card) => card.matchId === matchId),
-    matchId,
-    players
-  );
+  // All suspension logic removed
 }

@@ -51,29 +51,16 @@ export async function POST(request) {
 
 // PUT endpoint: updates a card (e.g. to set used: true)
 export async function PUT(request) {
-  try {
-    const client = await clientPromise;
-    const db = client.db();
-    const data = await request.json();
+  const { _id, used } = await request.json();
+  if (!_id) return NextResponse.json({ error: "Missing _id" }, { status: 400 });
 
-    if (!data.id) {
-      return NextResponse.json({ error: "Missing id" }, { status: 400 });
-    }
-
-    const result = await db.collection("cards").updateOne(
-      { id: data.id },
-      { $set: data }
-    );
-
-    return NextResponse.json({
-      success: true,
-      modifiedCount: result.modifiedCount,
-      card: data,
-    });
-  } catch (error) {
-    console.error("PUT /api/cards:", error);
-    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
-  }
+  const client = await clientPromise;
+  const db = client.db();
+  await db.collection("cards").updateOne(
+    { _id: new ObjectId(_id) },
+    { $set: { used } }
+  );
+  return NextResponse.json({ success: true });
 }
 
 // DELETE endpoint: removes a card by id

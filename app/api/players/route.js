@@ -50,17 +50,20 @@ export async function PUT(request) {
   const client = await clientPromise;
   const db = client.db();
   const data = await request.json();
-  const { _id, goals = 0, yellowCards = 0, redCards = 0 } = data;
+  const { _id, goals = 0, yellowCards = 0, redCards = 0, suspended } = data;
+
+  const updateFields = {
+    goals,
+    yellowCards,
+    redCards,
+  };
+  if (typeof suspended !== "undefined") {
+    updateFields.suspended = suspended;
+  }
 
   await db.collection("players").updateOne(
     { _id: new ObjectId(_id) },
-    {
-      $set: {
-        goals,
-        yellowCards,
-        redCards,
-      },
-    }
+    { $set: updateFields }
   );
 
   return NextResponse.json({ success: true });
