@@ -1,4 +1,4 @@
-export default function CoachCard({ team, players, print }) {
+export default function CoachCard({ team, print }) {
   return (
     <div className="card bg-gray-50 shadow-md px-8 py-4 flex flex-col w-full max-w-3xl">
       <div className="flex flex-row items-center justify-between">
@@ -12,12 +12,6 @@ export default function CoachCard({ team, players, print }) {
           </div>
         </div>
         <div className="flex gap-2">
-          <button
-            className="btn btn-secondary btn-sm"
-            onClick={players}
-          >
-            Joueurs
-          </button>
           <button
             className="btn btn-warning btn-sm"
             onClick={print}

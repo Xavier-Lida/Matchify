@@ -13,7 +13,6 @@ import {
 } from "@/utils/api";
 
 export default function CoachManager({ team: initialTeam }) {
-  const [showPlayers, setShowPlayers] = useState(false);
   const [showGamesheets, setShowGamesheets] = useState(false);
   const [team, setTeam] = useState(initialTeam);
   const [players, setPlayers] = useState([]);
@@ -34,7 +33,7 @@ export default function CoachManager({ team: initialTeam }) {
       }
       fetchPlayers();
     }
-  }, [showPlayers, team._id]);
+  }, [team._id]);
 
   // Fetch games and teams when gamesheets menu is opened
   useEffect(() => {
@@ -84,24 +83,15 @@ export default function CoachManager({ team: initialTeam }) {
 
     // 4. Update the team object in your backend and state
     await getPlayersByTeamId(team._id).then(setPlayers);
-    setShowPlayers(false);
   };
 
   return (
     <>
       <CoachCard
         team={team}
-        players={() => setShowPlayers(true)}
         print={() => setShowGamesheets(true)}
       />
       <PlayerList players={players} />
-      {showPlayers && (
-        <PlayerForm
-          players={players}
-          onSave={handleSavePlayers}
-          onClose={() => setShowPlayers(false)}
-        />
-      )}
       {showGamesheets && (
         <GamesheetsMenu
           team={team}
