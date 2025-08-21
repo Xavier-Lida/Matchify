@@ -28,7 +28,7 @@ function PlayerRow({
         return (
           <td
             key={col.key}
-            className="py-2 px-4 cursor-pointer rounded transition"
+            className="py-2 px-4 cursor-pointer rounded transition align-middle"
             style={{ minWidth: 0, width: "1%" }}
             onClick={(e) => {
               e.stopPropagation();
@@ -39,7 +39,7 @@ function PlayerRow({
               <input
                 ref={inputRef}
                 type={isNumber ? "number" : "text"}
-                className="input input-xs input-bordered w-full bg-transparent focus:bg-transparent shadow-none border border-gray-300 py-1 px-2 min-h-6"
+                className="input input-xs input-bordered w-full bg-transparent focus:bg-transparent shadow-none border border-gray-300 py-1 px-2 min-h-6 align-middle"
                 value={
                   isNumber &&
                   (row[col.key] < 0 ||
@@ -65,19 +65,28 @@ function PlayerRow({
                 required
               />
             ) : (
-              <span className="block w-full">{row[col.key]}</span>
+              <span className="block w-full align-middle">{row[col.key]}</span>
             )}
           </td>
         );
       })}
-      <td className="flex gap-3 justify-end py-2 px-4">
+      {/* Suspended switch column, aligned center and middle */}
+      <td className="flex gap-3 justify-end py-2 px-4 align-middle">
+        <input
+          type="checkbox"
+          value="synthwave"
+          className="toggle theme-controller"
+          checked={!!row.suspended}
+          readOnly
+          style={{ verticalAlign: "middle" }}
+        />
         <button
           className="btn btn-warning btn-xs"
           type="button"
           onClick={() => handleResetPlayer(rowIdx, row)}
           title="Réinitialiser ce joueur"
         >
-          &#8635; {/* Unicode for looping arrow */}
+          &#8635;
         </button>
         <button
           className="btn btn-error btn-xs px-2.5"
