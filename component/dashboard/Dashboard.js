@@ -104,7 +104,31 @@ export default function Dashboard() {
       playersB,
       goals = [],
       cards,
+      cardsA = {},
+      cardsB = {},
     } = data;
+
+    // Log all selected cards for the game, including "none"
+    console.log("Selected cards for team A:", cardsA);
+    console.log("Selected cards for team B:", cardsB);
+
+    // 0. Delete cards where "none" is selected for this match
+    const cardsToDelete = [
+      ...Object.entries(cardsA)
+        .filter(([_, type]) => type === "none")
+        .map(([playerId]) => ({ playerId, matchId: selectedMatchId })),
+      ...Object.entries(cardsB)
+        .filter(([_, type]) => type === "none")
+        .map(([playerId]) => ({ playerId, matchId: selectedMatchId })),
+    ];
+
+    await Promise.all(
+      cardsToDelete.map(async ({ playerId, matchId }) => {
+        await fetch(`/api/cards?playerId=${playerId}&matchId=${matchId}`, {
+          method: "DELETE",
+        });
+      })
+    );
 
     // 1. POST each card to the cards API and collect their IDs
     await Promise.all(

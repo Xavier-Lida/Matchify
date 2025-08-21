@@ -208,6 +208,8 @@ export default function MatchForm({
           playersB,
           goals,
           cards,
+          cardsA, // <-- add this
+          cardsB, // <-- add this
         });
       }}
     >

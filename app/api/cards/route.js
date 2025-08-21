@@ -63,15 +63,17 @@ export async function PUT(request) {
   return NextResponse.json({ success: true });
 }
 
-// DELETE endpoint: removes a card by id
+// DELETE endpoint: removes a card by playerId and matchId
 export async function DELETE(request) {
-  const url = new URL(request.url);
+  const url = new URL(request.url, "http://localhost:3000");
+  const playerId = url.searchParams.get("playerId");
   const matchId = url.searchParams.get("matchId");
-  if (!matchId) {
-    return NextResponse.json({ error: "matchId required" }, { status: 400 });
+  if (!playerId || !matchId) {
+    return NextResponse.json({ error: "Missing playerId or matchId" }, { status: 400 });
   }
+  console.log("Deleting card", { playerId, matchId });
   const client = await clientPromise;
   const db = client.db();
-  await db.collection("cards").deleteMany({ matchId });
+  await db.collection("cards").deleteOne({ playerId, matchId });
   return NextResponse.json({ success: true });
 }
