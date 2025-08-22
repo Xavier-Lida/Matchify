@@ -47,24 +47,14 @@ export async function DELETE(request) {
 }
 
 export async function PUT(request) {
+  const url = new URL(request.url, "http://localhost:3000");
+  const id = url.searchParams.get("id");
+  const { suspended } = await request.json();
   const client = await clientPromise;
   const db = client.db();
-  const data = await request.json();
-  const { _id, goals = 0, yellowCards = 0, redCards = 0, suspended } = data;
-
-  const updateFields = {
-    goals,
-    yellowCards,
-    redCards,
-  };
-  if (typeof suspended !== "undefined") {
-    updateFields.suspended = suspended;
-  }
-
   await db.collection("players").updateOne(
-    { _id: new ObjectId(_id) },
-    { $set: updateFields }
+    { _id: new ObjectId(id) },
+    { $set: { suspended } }
   );
-
   return NextResponse.json({ success: true });
 }

@@ -12,6 +12,7 @@ function PlayerRow({
   inputRef,
   minRows,
   totalRows,
+  handleToggleSuspended, // <-- Add this prop
 }) {
   return (
     <tr
@@ -77,7 +78,8 @@ function PlayerRow({
           value="synthwave"
           className="toggle theme-controller"
           checked={!!row.suspended}
-          readOnly
+          onClick={(e) => e.stopPropagation()} // <-- Prevent cell edit mode
+          onChange={() => handleToggleSuspended(rowIdx, !row.suspended)}
           style={{ verticalAlign: "middle" }}
         />
         <button

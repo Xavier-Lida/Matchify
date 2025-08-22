@@ -83,12 +83,18 @@ export default function GamesheetDocument({ game, team, opponent, players }) {
           </View>
           {filledPlayers.map((p, idx) => (
             <View style={styles.tableRow} key={p._id || idx}>
-              <Text style={styles.cellStatut}>{p.status || ""}</Text>
+              <Text style={styles.cellStatut}>
+                {p.suspended ? "Suspendu" : (p.status || "")}
+              </Text>
               <Text style={styles.cellNum}>
                 {typeof p.number === "number" ? p.number : (p.number ? p.number : "")}
               </Text>
-              <Text style={styles.cellName}>{(p.firstName || "") + (p.lastName ? " " + p.lastName : "")}</Text>
-              <Text style={styles.cellCartons}>{p.yellowCard ? "X" : ""}{p.redCard ? " X" : ""}</Text>
+              <Text style={styles.cellName}>
+                {(p.firstName || "") + (p.lastName ? " " + p.lastName : "")}
+              </Text>
+              <Text style={styles.cellCartons}>
+                {p.yellowCard ? "X" : ""}{p.redCard ? " X" : ""}
+              </Text>
               <Text style={styles.cellButs}></Text>
             </View>
           ))}

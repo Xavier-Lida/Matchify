@@ -74,6 +74,24 @@ export default function PlayerForm({ players = [], onSave, onClose }) {
     );
   };
 
+  const handleToggleSuspended = async (rowIdx, newValue) => {
+    setRows((prev) =>
+      prev.map((row, i) =>
+        i === rowIdx ? { ...row, suspended: newValue } : row
+      )
+    );
+
+    // If the player has an _id, update in DB
+    const player = rows[rowIdx];
+    if (player && player._id) {
+      await fetch(`/api/players?id=${player._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ suspended: newValue }),
+      });
+    }
+  };
+
   const handleSave = () => {
     if (onSave) {
       // Only send rows with at least a first or last name or number
@@ -128,6 +146,8 @@ export default function PlayerForm({ players = [], onSave, onClose }) {
               <col className="min-w-[150px]" />
               <col className="min-w-[200px]" />
               <col className="min-w-[80px]" />
+              <col className="min-w-[80px]" />
+              <col className="min-w-[120px]" />
             </colgroup>
             <thead>
               <tr className="sticky top-0 bg-gray-100 font-bold text-gray-700 z-10">
@@ -136,7 +156,8 @@ export default function PlayerForm({ players = [], onSave, onClose }) {
                     {col.label}
                   </th>
                 ))}
-                <th className="py-3 px-4"></th>
+                <th className="py-3 px-4 text-center">Suspendu</th>
+                <th className="py-3 px-4 text-center"></th> {/* Actions column */}
               </tr>
             </thead>
             <tbody>
@@ -156,6 +177,7 @@ export default function PlayerForm({ players = [], onSave, onClose }) {
                   inputRef={inputRef}
                   minRows={10}
                   totalRows={rows.length}
+                  handleToggleSuspended={handleToggleSuspended}
                 />
               ))}
             </tbody>
