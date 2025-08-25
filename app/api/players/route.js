@@ -49,12 +49,11 @@ export async function DELETE(request) {
 export async function PUT(request) {
   const url = new URL(request.url, "http://localhost:3000");
   const id = url.searchParams.get("id");
-  const { suspended } = await request.json();
+  const updateData = await request.json(); // Accept all fields to update
   const client = await clientPromise;
   const db = client.db();
-  await db.collection("players").updateOne(
-    { _id: new ObjectId(id) },
-    { $set: { suspended } }
-  );
+  await db
+    .collection("players")
+    .updateOne({ _id: new ObjectId(id) }, { $set: updateData });
   return NextResponse.json({ success: true });
 }

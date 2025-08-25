@@ -23,54 +23,43 @@ function PlayerRow({
       }
       style={{ height: "2.5rem" }}
     >
-      {columns.map((col) => {
-        const isEditing = editing.row === rowIdx && editing.col === col.key;
-        const isNumber = col.key === "number";
-        return (
-          <td
-            key={col.key}
-            className="py-2 px-4 cursor-pointer rounded transition align-middle"
-            style={{ minWidth: 0, width: "1%" }}
-            onClick={(e) => {
-              e.stopPropagation();
-              setEditing({ row: rowIdx, col: col.key });
-            }}
-          >
-            {isEditing ? (
-              <input
-                ref={inputRef}
-                type={isNumber ? "number" : "text"}
-                className="input input-xs input-bordered w-full bg-transparent focus:bg-transparent shadow-none border border-gray-300 py-1 px-2 min-h-6 align-middle"
-                value={
-                  isNumber &&
-                  (row[col.key] < 0 ||
-                    row[col.key] === "" ||
-                    row[col.key] == null)
-                    ? ""
-                    : row[col.key] ?? ""
-                }
-                onChange={(e) =>
-                  handleInputChange(
-                    rowIdx,
-                    col.key,
-                    isNumber
-                      ? e.target.value === ""
-                        ? ""
-                        : e.target.valueAsNumber
-                      : e.target.value
-                  )
-                }
-                onBlur={handleInputBlur}
-                onKeyDown={handleInputKeyDown}
-                autoFocus
-                required
-              />
-            ) : (
-              <span className="block w-full align-middle">{row[col.key]}</span>
-            )}
-          </td>
-        );
-      })}
+      {columns.map((col) => (
+        <td
+          key={col.key}
+          className="py-2 px-4 cursor-pointer rounded transition align-middle"
+          style={{ minWidth: 0, width: "1%" }}
+          onClick={(e) => {
+            e.stopPropagation();
+            setEditing({ row: rowIdx, col: col.key });
+          }}
+        >
+          {editing.row === rowIdx && editing.col === col.key ? (
+            <input
+              ref={inputRef}
+              type={col.key === "number" ? "number" : "text"}
+              className="input input-xs input-bordered w-full bg-transparent focus:bg-transparent shadow-none border border-gray-300 py-1 px-2 min-h-6 align-middle"
+              value={row[col.key] ?? ""}
+              onChange={(e) =>
+                handleInputChange(
+                  rowIdx,
+                  col.key,
+                  col.key === "number"
+                    ? e.target.value === ""
+                      ? ""
+                      : e.target.valueAsNumber
+                    : e.target.value
+                )
+              }
+              onBlur={handleInputBlur}
+              onKeyDown={handleInputKeyDown}
+              autoFocus
+              required
+            />
+          ) : (
+            <span className="block w-full align-middle">{row[col.key]}</span>
+          )}
+        </td>
+      ))}
       {/* Suspended switch column, aligned center and middle */}
       <td className="flex gap-3 justify-end py-2 px-4 align-middle">
         <input
