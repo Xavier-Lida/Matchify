@@ -157,7 +157,7 @@ export default function PlayerForm({ players = [], onSave, onClose }) {
                   </th>
                 ))}
                 <th className="py-3 px-4 text-center">Suspendu</th>
-                <th className="py-3 px-4 text-center"></th> {/* Actions column */}
+                <th className="py-3 px-4 text-center"></th>
               </tr>
             </thead>
             <tbody>

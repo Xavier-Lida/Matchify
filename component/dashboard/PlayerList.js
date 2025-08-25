@@ -2,14 +2,42 @@ import React from "react";
 
 // Simple SVG icons for yellow and red cards
 const YellowCardIcon = () => (
-  <svg width="18" height="24" viewBox="0 0 18 24" className="inline mr-1 align-middle">
-    <rect width="14" height="20" x="2" y="2" rx="2" fill="#ffe066" stroke="#e2b400" strokeWidth="2" />
+  <svg
+    width="18"
+    height="24"
+    viewBox="0 0 18 24"
+    className="inline mr-1 align-middle"
+  >
+    <rect
+      width="14"
+      height="20"
+      x="2"
+      y="2"
+      rx="2"
+      fill="#ffe066"
+      stroke="#e2b400"
+      strokeWidth="2"
+    />
   </svg>
 );
 
 const RedCardIcon = () => (
-  <svg width="18" height="24" viewBox="0 0 18 24" className="inline mr-1 align-middle">
-    <rect width="14" height="20" x="2" y="2" rx="2" fill="#ff4d4f" stroke="#b71c1c" strokeWidth="2" />
+  <svg
+    width="18"
+    height="24"
+    viewBox="0 0 18 24"
+    className="inline mr-1 align-middle"
+  >
+    <rect
+      width="14"
+      height="20"
+      x="2"
+      y="2"
+      rx="2"
+      fill="#ff4d4f"
+      stroke="#b71c1c"
+      strokeWidth="2"
+    />
   </svg>
 );
 
@@ -45,15 +73,17 @@ const PlayerList = ({ players }) => {
                   <td className="py-3 px-4">
                     {player.yellowCards > 0 && (
                       <>
-                        <YellowCardIcon />{player.yellowCards}
+                        <YellowCardIcon />
+                        {player.yellowCards}
                       </>
                     )}
                     {player.redCards > 0 && (
                       <>
-                        <RedCardIcon />{player.redCards}
+                        <RedCardIcon />
+                        {player.redCards}
                       </>
                     )}
-                    {(player.yellowCards === 0 && player.redCards === 0) && (
+                    {player.yellowCards === 0 && player.redCards === 0 && (
                       <span className="text-gray-400">—</span>
                     )}
                   </td>
