@@ -92,35 +92,22 @@ export default function PlayerForm({ players = [], onSave, onClose }) {
     }
   };
 
-  const handleSave = async () => {
-    await Promise.all(
-      rows.map(async (row) => {
-        if (row._id) {
-          await fetch(`/api/players?id=${row._id}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              firstName: row.firstName,
-              lastName: row.lastName,
-              number: row.number,
-              suspended: !!row.suspended,
-            }),
-          });
-        } else if (row.firstName || row.lastName || row.number) {
-          await fetch(`/api/players`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              firstName: row.firstName,
-              lastName: row.lastName,
-              number: row.number,
-              suspended: !!row.suspended,
-            }),
-          });
-        }
-      })
-    );
-    if (onClose) onClose(); // <-- Close the form after saving
+  const handleSave = () => {
+    if (onSave) {
+      // Only send rows with at least a first or last name or number
+      onSave(
+        rows.filter(
+          (row) =>
+            row.firstName?.trim() ||
+            row.lastName?.trim() ||
+            row.number?.toString().trim()
+        )
+      );
+    } else {
+      // fallback: log to console
+      // eslint-disable-next-line no-console
+      console.log(rows);
+    }
   };
 
   const columns = [

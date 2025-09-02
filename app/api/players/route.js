@@ -49,9 +49,15 @@ export async function DELETE(request) {
 export async function PUT(request) {
   const url = new URL(request.url, "http://localhost:3000");
   const id = url.searchParams.get("id");
-  const updateData = await request.json(); // Accept all fields to update
+  const updateData = await request.json();
   const client = await clientPromise;
   const db = client.db();
+
+  // Remove _id from updateData if present
+  if ('_id' in updateData) {
+    delete updateData._id;
+  }
+
   await db
     .collection("players")
     .updateOne({ _id: new ObjectId(id) }, { $set: updateData });

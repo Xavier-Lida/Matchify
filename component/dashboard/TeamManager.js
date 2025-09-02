@@ -4,7 +4,7 @@ import TeamForm from "./TeamForm";
 import PlayerForm from "./PlayerForm";
 import PlayerList from "./PlayerList";
 import { useState, useEffect } from "react";
-import { cleanPlayers, sendPlayersToDb } from "@/utils/exportPlayers";
+import { cleanPlayers, updatePlayers } from "@/utils/exportPlayers";
 import {
   getPlayersByTeamId,
   updateTeam,
@@ -52,33 +52,19 @@ export default function TeamManager({ team: initialTeam, onTeamDeleted }) {
 
   // Save players changes
   const handleSavePlayers = async (players) => {
+    // 1. Update existing players in DB
+    await updatePlayers(players, team._id);
+
+    // 2. Clean all players (prepares new players for insertion)
     const cleanedPlayers = cleanPlayers(players, team._id);
 
-    // 1. Update existing players only
-    const existingPlayers = cleanedPlayers.filter((p) => p._id);
-    if (existingPlayers.length > 0) {
-      await sendPlayersToDb(existingPlayers, team._id);
-    }
-
-    // 2. Insert only new players
+    // 3. Insert only new players (those without _id)
     const newPlayers = cleanedPlayers.filter((p) => !p._id);
-    let insertedPlayers = [];
     if (newPlayers.length > 0) {
-      insertedPlayers = await insertPlayers(newPlayers);
+      await insertPlayers(newPlayers);
     }
 
-    // 3. Merge new _ids into cleanedPlayers
-    const mergedPlayers = cleanedPlayers.map((player) => {
-      if (!player._id) {
-        const inserted = insertedPlayers.find(
-          (p) => p.number === player.number
-        );
-        return inserted ? { ...player, _id: inserted._id } : player;
-      }
-      return player;
-    });
-
-    // 4. Update the team object in your backend and state
+    // 4. Refresh state/UI
     await getPlayersByTeamId(team._id).then(setPlayers);
     setShowPlayers(false);
   };

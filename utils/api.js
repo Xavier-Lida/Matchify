@@ -65,19 +65,18 @@ export async function fetchGames() {
     return [];
   }
 }
-export async function insertPlayers(players) {
-  try {
-    const response = await fetch("/api/players", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ players }),
-    });
-    const data = await response.json();
-    return data.insertedPlayers || [];
-  } catch (error) {
-    console.error("Error inserting players:", error);
-    throw error;
+export async function insertPlayers(newPlayers) {
+  const res = await fetch("/api/players", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ players: newPlayers }),
+  });
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error("Failed to insert players:", errorText);
+    throw new Error(`Failed to insert players: ${errorText}`);
   }
+  return await res.json();
 }
 export async function getPlayers() {
   try {
