@@ -5,14 +5,14 @@ export function MatchCard({
   teamAName,
   teamBLogo,
   teamBName,
-  date,
+  division,
   time,
 }) {
   return (
-    <div className="bg-blue-600 rounded-xl p-5 flex items-center justify-between shadow-lg border border-blue-500">
+    <div className="bg-secondary rounded-xl p-5 flex items-center justify-between shadow-lg border border-base-100">
       {/* Team A */}
-      <div className="flex items-center">
-        <div className="w-14 h-14 bg-white rounded-lg p-1 shadow-sm">
+      <div className="flex items-center h-full">
+        <div className="aspect-square h-full bg-white rounded-lg p-1 shadow-sm flex items-center justify-center">
           <Image
             src={teamALogo}
             alt={teamAName}
@@ -23,22 +23,29 @@ export function MatchCard({
         </div>
       </div>
 
-      {/* Date and Time */}
+      {/* Division and Time */}
       <div className="flex flex-col items-center">
         <div
-          className="bg-sky-400 text-white px-4 py-2 rounded-lg text-sm"
+          className="bg-blue-900 text-white px-4 py-2 rounded-lg text-sm"
           style={{ fontWeight: 700 }}
         >
-          {date}
+          {division}
         </div>
-        <div className="text-2xl text-white mt-2" style={{ fontWeight: 900 }}>
+        <div
+          className="text-4xl text-white mt-2"
+          style={{
+            fontFamily: "var(--font-titan-one), system-ui",
+            fontWeight: 400,
+            fontStyle: "normal",
+          }}
+        >
           {time}
         </div>
       </div>
 
       {/* Team B */}
-      <div className="flex items-center">
-        <div className="w-14 h-14 bg-white rounded-lg p-1 shadow-sm">
+      <div className="flex items-center h-full">
+        <div className="aspect-square h-full bg-white rounded-lg p-1 shadow-sm flex items-center justify-center">
           <Image
             src={teamBLogo}
             alt={teamBName}

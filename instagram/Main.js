@@ -6,11 +6,11 @@ export default function App() {
   // Sample match data
   const matches = [
     {
-      teamALogo: null,
+      teamALogo: "/logos/McDonaldFC.JPG",
       teamAName: "LEVIS EST",
-      teamBLogo: null,
+      teamBLogo: "/logos/BuffaloFC.PNG",
       teamBName: "CHARLESBOURG",
-      date: "SAM, 30 AOÛT",
+      date: "Div 1, terrain 1",
       time: "16H30",
     },
     {
@@ -92,7 +92,7 @@ export default function App() {
     <div className="flex items-center justify-center min-h-screen bg-gray-100 p-4">
       {/* Instagram Post Container - 1080x1350px */}
       <div
-        className="bg-gradient-to-br from-blue-700 via-blue-800 to-blue-900 overflow-hidden shadow-2xl rounded-3xl border-4 border-cyan-400"
+        className="bg-gradient-to-br from-slate-500 via-primary to-slate-900 overflow-hidden shadow-2xl rounded-3xl border-4 border-accent"
         style={{
           width: "1080px",
           height: "1350px",
@@ -101,8 +101,9 @@ export default function App() {
         {/* Header */}
         <ScheduleHeader
           leagueLogoUrl={logoFutsalMauricie}
-          matchday={21}
-          subtitle="L2QC • MASCULIN"
+          date={"30 août 2025"}
+          matchday={1}
+          subtitle="Ligue Futsal Mauricie"
         />
 
         {/* Matches Grid */}
@@ -115,7 +116,7 @@ export default function App() {
                 teamAName={match.teamAName}
                 teamBLogo={match.teamBLogo}
                 teamBName={match.teamBName}
-                date={match.date}
+                division={match.date}
                 time={match.time}
               />
             ))}

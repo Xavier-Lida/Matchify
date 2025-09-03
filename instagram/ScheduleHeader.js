@@ -1,17 +1,15 @@
 import Image from "next/image";
 
-export function ScheduleHeader({ leagueLogoUrl, matchday, subtitle }) {
+export function ScheduleHeader({ leagueLogoUrl, date, matchday, subtitle }) {
   return (
     <div className="flex items-center justify-between px-8 py-6 text-white">
       {/* Logo */}
       <div className="flex items-center">
         {leagueLogoUrl && (
-          <div className="w-20 h-20 bg-white rounded-xl p-3">
+          <div className="w-30 h-30 bg-white rounded-xl p-3">
             <Image
               src={leagueLogoUrl}
               alt="League Logo"
-              width={80}
-              height={80}
               className="w-full h-full object-contain"
             />
           </div>
@@ -21,21 +19,25 @@ export function ScheduleHeader({ leagueLogoUrl, matchday, subtitle }) {
       {/* Program Title */}
       <div className="flex-1 text-center">
         <h1
-          className="text-6xl text-white tracking-wider"
-          style={{ fontWeight: 900 }}
+          className="text-5xl tracking-wider text-base-100"
+          style={{
+            fontFamily: "var(--font-titan-one), system-ui",
+            fontWeight: 400,
+            fontStyle: "normal",
+          }}
         >
-          PROGRAMME
+          {subtitle}
         </h1>
       </div>
 
       {/* Subtitle and Matchday */}
       <div className="text-right">
-        <div className="text-cyan-300 text-xl mb-2" style={{ fontWeight: 600 }}>
-          {subtitle}
+        <div className="text-base-100 text-xl mb-2" style={{ fontWeight: 600 }}>
+          JOURNÉE {matchday}
         </div>
         <div className="bg-blue-900 px-6 py-3 rounded-xl">
-          <span className="text-white text-xl" style={{ fontWeight: 700 }}>
-            JOURNÉE {matchday}
+          <span className="text-base-100 text-xl" style={{ fontWeight: 700 }}>
+            {date}
           </span>
         </div>
       </div>
