@@ -7,8 +7,13 @@ export default async function CoachDashboardPage() {
   try {
     const session = await auth();
 
-    // Use relative URL for API route
-    const res = await fetch("/api/coaches", { cache: "no-store" });
+    // Build absolute URL for server-side fetch
+    const baseUrl =
+      process.env.NEXT_PUBLIC_BASE_URL || process.env.VERCEL_URL
+        ? `https://${process.env.VERCEL_URL}`
+        : "http://localhost:3000";
+
+    const res = await fetch(`${baseUrl}/api/coaches`, { cache: "no-store" });
     const coachEmails = await res.json();
 
     const userEmail = session?.user?.email;
