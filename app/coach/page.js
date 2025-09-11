@@ -8,10 +8,7 @@ export default async function CoachDashboardPage() {
     const session = await auth();
 
     // Build absolute URL for server-side fetch
-    const baseUrl =
-      process.env.NEXT_PUBLIC_BASE_URL || process.env.VERCEL_URL
-        ? `https://${process.env.VERCEL_URL}`
-        : "http://localhost:3000";
+    const baseUrl = "https://matchify.ca";
 
     const res = await fetch(`${baseUrl}/api/coaches`, { cache: "no-store" });
     const coachEmails = await res.json();
