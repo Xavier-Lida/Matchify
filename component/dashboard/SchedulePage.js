@@ -100,10 +100,10 @@ export default function SchedulePage() {
   ).sort((a, b) => a - b);
 
   return (
-    <div className="p-4 max-w-5xl mx-auto">
+    <div className="p-2 sm:p-4 max-w-full sm:max-w-5xl mx-auto overflow-x-auto">
       <h2 className="text-2xl font-bold mb-6">Calendrier des matchs</h2>
       {/* Filters */}
-      <div className="flex flex-wrap gap-4 mb-8">
+      <div className="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-4 mb-8">
         <div>
           <label
             className="block text-sm font-medium mb-1"
@@ -187,7 +187,7 @@ export default function SchedulePage() {
                       return (
                         <li
                           key={index}
-                          className="bg-white shadow rounded-lg border border-gray-200 px-6 py-4 flex flex-col gap-2 md:flex-row md:items-center md:gap-8"
+                          className="bg-white w-full shadow rounded-lg border border-gray-200 px-2 py-3 flex flex-col gap-2 md:flex-row md:items-center md:gap-8"
                         >
                           {/* Date, location & status */}
                           <div className="flex flex-col items-start min-w-[140px] md:border-r md:pr-6">
@@ -206,16 +206,16 @@ export default function SchedulePage() {
                             </div>
                           </div>
                           {/* Teams & score */}
-                          <div className="flex-1 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-                            <div className="flex items-center gap-4 flex-1">
+                          <div className="flex-1 flex flex-col w-full md:flex-row md:justify-between gap-2">
+                            <div className="flex items-center gap-2 flex-1">
                               {/* Team A */}
-                              <div className="flex flex-col items-end flex-1 min-w-[180px] md:min-w-[220px] truncate">
+                              <div className="flex flex-col items-start truncate">
                                 <span className="font-semibold text-base md:text-lg break-words truncate">
                                   {teamA?.name || "?"}
                                 </span>
                               </div>
                               {/* Score */}
-                              <div className="flex flex-col items-center mx-2 min-w-[60px]">
+                              <div className="flex flex-col items-center mx-2">
                                 {match.status === "played" ? (
                                   <span className="text-xl font-bold">
                                     {match.scoreA}{" "}
@@ -229,7 +229,7 @@ export default function SchedulePage() {
                                 )}
                               </div>
                               {/* Team B */}
-                              <div className="flex flex-col items-start flex-1 min-w-[180px] md:min-w-[220px] truncate">
+                              <div className="flex flex-col items-end truncate">
                                 <span className="font-semibold text-base md:text-lg break-words truncate">
                                   {teamB?.name || "?"}
                                 </span>
