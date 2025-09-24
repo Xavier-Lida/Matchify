@@ -5,11 +5,7 @@ import ScheduleDelete from "./ScheduleDelete";
 import { generateSchedule } from "@/utils/generateSchedule";
 import { exportSchedule } from "@/utils/exportSchedule";
 
-export default function ScheduleForm({
-  onSubmitAuto,
-  setSchedule,
-  onCancel,
-}) {
+export default function ScheduleForm({ onSubmitAuto, setSchedule, onCancel }) {
   const [activeMode, setActiveMode] = useState(""); // "auto", "manu", "edit"
   const [teams, setTeams] = useState([]);
   const [games, setGames] = useState([]);
@@ -36,12 +32,12 @@ export default function ScheduleForm({
       {/* Main menu */}
       {activeMode === "" && (
         <div className="flex flex-col gap-3 mb-3">
-          <button
+          {/* <button
             className="btn btn-warning"
             onClick={() => setActiveMode("auto")}
           >
             Générer automatiquement l'horaire
-          </button>
+          </button> */}
           <button
             className="btn btn-success"
             onClick={() => setActiveMode("manu")}

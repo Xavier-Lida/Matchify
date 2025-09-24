@@ -4,7 +4,9 @@ import { fetchGames, getTeams } from "@/utils/api";
 
 function formatDateFR(dateStr) {
   if (!dateStr) return "";
-  const date = new Date(dateStr);
+  // Parse as local date
+  const [year, month, day] = dateStr.split("-");
+  const date = new Date(Number(year), Number(month) - 1, Number(day));
   return date.toLocaleDateString("fr-FR", {
     day: "numeric",
     month: "short",

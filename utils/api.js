@@ -53,8 +53,7 @@ export async function deleteTeam(teamId) {
 }
 export async function fetchGames() {
   try {
-    const url = new URL("/api/games", "http://localhost:3000");
-    const response = await fetch(url);
+    const response = await fetch("/api/games");
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
