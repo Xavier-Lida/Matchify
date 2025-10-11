@@ -35,11 +35,8 @@ const styles = StyleSheet.create({
 });
 
 export default function GamesheetDocument({ game, team, opponent, players }) {
-  // Ensure at least 10 rows for players
-  const filledPlayers = [
-    ...players,
-    ...Array(Math.max(0, 10 - players.length)).fill({}),
-  ].slice(0, 10);
+  // Remove the logic that limits to 10 players
+  const filledPlayers = players || [];
 
   return (
     <Document>
