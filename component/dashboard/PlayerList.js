@@ -51,6 +51,7 @@ const PlayerList = ({ players }) => {
               <col className="min-w-[150px]" />
               <col className="min-w-[200px]" />
               <col className="min-w-[80px]" />
+              <col className="min-w-[80px]" />
               <col className="min-w-[100px]" />
             </colgroup>
             <thead>
@@ -58,6 +59,7 @@ const PlayerList = ({ players }) => {
                 <th className="py-3 px-4 text-left">Prénom</th>
                 <th className="py-3 px-4 text-left">Nom</th>
                 <th className="py-3 px-4 text-left">Numéro</th>
+                <th className="py-3 px-4 text-left">Matchs</th>
                 <th className="py-3 px-4 text-left">Cartons</th>
               </tr>
             </thead>
@@ -70,6 +72,11 @@ const PlayerList = ({ players }) => {
                   <td className="py-3 px-4">{player.firstName}</td>
                   <td className="py-3 px-4">{player.lastName}</td>
                   <td className="py-3 px-4">{player.number}</td>
+                  <td className="py-3 px-4 text-center">
+                    <span className="inline-flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-800 text-sm font-semibold rounded-full">
+                      {player.gamesPlayed || 0}
+                    </span>
+                  </td>
                   <td className="py-3 px-4">
                     {player.yellowCards > 0 && (
                       <>

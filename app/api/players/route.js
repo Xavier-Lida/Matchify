@@ -47,19 +47,40 @@ export async function DELETE(request) {
 }
 
 export async function PUT(request) {
-  const url = new URL(request.url, "http://localhost:3000");
-  const id = url.searchParams.get("id");
-  const updateData = await request.json();
-  const client = await clientPromise;
-  const db = client.db();
+  try {
+    const url = new URL(request.url, "http://localhost:3000");
+    const id = url.searchParams.get("id");
+    const updateData = await request.json();
+    const client = await clientPromise;
+    const db = client.db();
 
-  // Remove _id from updateData if present
-  if ('_id' in updateData) {
-    delete updateData._id;
+    if (!id) {
+      return NextResponse.json({ error: "Missing player ID" }, { status: 400 });
+    }
+
+    // Handle $inc operations (for incrementing gamesPlayed)
+    let updateOperation = {};
+
+    if (updateData.$inc) {
+      updateOperation.$inc = updateData.$inc;
+    }
+
+    // Handle regular $set operations
+    const { $inc, _id, ...setData } = updateData;
+    if (Object.keys(setData).length > 0) {
+      updateOperation.$set = setData;
+    }
+
+    const result = await db
+      .collection("players")
+      .updateOne({ _id: new ObjectId(id) }, updateOperation);
+
+    return NextResponse.json({
+      success: true,
+      modifiedCount: result.modifiedCount,
+    });
+  } catch (error) {
+    console.error("PUT /api/players:", error);
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
-
-  await db
-    .collection("players")
-    .updateOne({ _id: new ObjectId(id) }, { $set: updateData });
-  return NextResponse.json({ success: true });
 }

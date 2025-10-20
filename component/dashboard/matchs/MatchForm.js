@@ -4,7 +4,7 @@ import { resetMatch } from "@/utils/resetMatch"; // <-- Import your resetMatch f
 import ScorerForm from "./ScorerForm";
 
 export default function MatchForm({
-  teams = { teams },
+  teams,
   onSubmit,
   onCancel,
   submitLabel = "",
@@ -20,6 +20,8 @@ export default function MatchForm({
   const [scoresB, setScoresB] = useState({});
   const [cardsA, setCardsA] = useState({});
   const [cardsB, setCardsB] = useState({});
+  const [playedGamesA, setPlayedGamesA] = useState({});
+  const [playedGamesB, setPlayedGamesB] = useState({});
 
   // Load players and prefill scores/cards when match changes
   useEffect(() => {
@@ -30,12 +32,16 @@ export default function MatchForm({
       setScoresB({});
       setCardsA({});
       setCardsB({});
+      setPlayedGamesA({});
+      setPlayedGamesB({});
       return;
     }
 
     // Always clear cards state immediately when match changes
     setCardsA({});
     setCardsB({});
+    setPlayedGamesA({});
+    setPlayedGamesB({});
 
     // Fetch players for both teams, then fetch cards and assign to teams
     Promise.all([
@@ -129,6 +135,25 @@ export default function MatchForm({
     }));
   };
 
+  // Add handlers for the checkboxes
+  const handlePlayedGameChangeA = (e) => {
+    const { name, checked } = e.target;
+    const playerId = name.split("-")[1];
+    setPlayedGamesA((prev) => ({
+      ...prev,
+      [playerId]: checked,
+    }));
+  };
+
+  const handlePlayedGameChangeB = (e) => {
+    const { name, checked } = e.target;
+    const playerId = name.split("-")[1];
+    setPlayedGamesB((prev) => ({
+      ...prev,
+      [playerId]: checked,
+    }));
+  };
+
   // Derived values
   const valueA = Object.values(scoresA).reduce((sum, val) => sum + val, 0);
   const valueB = Object.values(scoresB).reduce((sum, val) => sum + val, 0);
@@ -192,6 +217,8 @@ export default function MatchForm({
     setScoresB({});
     setCardsA({});
     setCardsB({});
+    setPlayedGamesA({});
+    setPlayedGamesB({});
     if (onResetSuccess) onResetSuccess(); // <-- call parent handler
   };
 
@@ -200,6 +227,17 @@ export default function MatchForm({
       className="bg-white rounded-lg shadow-lg p-6 w-full max-w-2xl flex flex-col gap-4"
       onSubmit={(e) => {
         e.preventDefault();
+
+        // Collect which players played
+        const playersWhoPlayed = [
+          ...Object.entries(playedGamesA)
+            .filter(([_, played]) => played)
+            .map(([playerId, _]) => playerId),
+          ...Object.entries(playedGamesB)
+            .filter(([_, played]) => played)
+            .map(([playerId, _]) => playerId),
+        ];
+
         onSubmit(e, {
           selectedMatchId,
           scoresA,
@@ -210,6 +248,7 @@ export default function MatchForm({
           cards,
           cardsA, // <-- add this
           cardsB, // <-- add this
+          playersWhoPlayed, // Send this to the parent
         });
       }}
     >
@@ -272,22 +311,44 @@ export default function MatchForm({
 
       {/* Scorers and cards */}
       <div>
-        <label className="block mb-1 font-medium">Buteurs et cartons</label>
+        <label className="block mb-1 font-medium">
+          Buteurs, cartons et participation
+        </label>
         <div className="flex gap-8">
-          <ScorerForm
-            players={playersA}
-            onChange={handleChangeA}
-            scores={scoresA}
-            cards={cardsA}
-            onCardChange={handleCardChangeA}
-          />
-          <ScorerForm
-            players={playersB}
-            onChange={handleChangeB}
-            scores={scoresB}
-            cards={cardsB}
-            onCardChange={handleCardChangeB}
-          />
+          <div className="flex-1">
+            <div className="grid grid-cols-[2fr_0.7fr_1.2fr_0.8fr] gap-1 mb-2 text-xs font-medium">
+              <span>Joueur</span>
+              <span className="text-center">Buts</span>
+              <span className="text-center">Cartons</span>
+              <span className="text-center">Joué</span>
+            </div>
+            <ScorerForm
+              players={playersA}
+              onChange={handleChangeA}
+              scores={scoresA}
+              cards={cardsA}
+              onCardChange={handleCardChangeA}
+              playedGames={playedGamesA}
+              onPlayedGameChange={handlePlayedGameChangeA}
+            />
+          </div>
+          <div className="flex-1">
+            <div className="grid grid-cols-[2fr_0.7fr_1.2fr_0.8fr] gap-1 mb-2 text-xs font-medium">
+              <span>Joueur</span>
+              <span className="text-center">Buts</span>
+              <span className="text-center">Cartons</span>
+              <span className="text-center">Joué</span>
+            </div>
+            <ScorerForm
+              players={playersB}
+              onChange={handleChangeB}
+              scores={scoresB}
+              cards={cardsB}
+              onCardChange={handleCardChangeB}
+              playedGames={playedGamesB}
+              onPlayedGameChange={handlePlayedGameChangeB}
+            />
+          </div>
         </div>
       </div>
 

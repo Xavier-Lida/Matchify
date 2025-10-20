@@ -106,68 +106,102 @@ export default function Dashboard() {
       cards,
       cardsA = {},
       cardsB = {},
+      playersWhoPlayed = [], // Add this new field
     } = data;
 
     // Log all selected cards for the game, including "none"
     console.log("Selected cards for team A:", cardsA);
     console.log("Selected cards for team B:", cardsB);
+    console.log("Players who played:", playersWhoPlayed);
 
-    // 0. Delete cards where "none" is selected for this match
-    const cardsToDelete = [
-      ...Object.entries(cardsA)
-        .filter(([_, type]) => type === "none")
-        .map(([playerId]) => ({ playerId, matchId: selectedMatchId })),
-      ...Object.entries(cardsB)
-        .filter(([_, type]) => type === "none")
-        .map(([playerId]) => ({ playerId, matchId: selectedMatchId })),
-    ];
+    try {
+      // 0. Delete cards where "none" is selected for this match
+      const cardsToDelete = [
+        ...Object.entries(cardsA)
+          .filter(([_, type]) => type === "none")
+          .map(([playerId]) => ({ playerId, matchId: selectedMatchId })),
+        ...Object.entries(cardsB)
+          .filter(([_, type]) => type === "none")
+          .map(([playerId]) => ({ playerId, matchId: selectedMatchId })),
+      ];
 
-    await Promise.all(
-      cardsToDelete.map(async ({ playerId, matchId }) => {
-        await fetch(`/api/cards?playerId=${playerId}&matchId=${matchId}`, {
-          method: "DELETE",
-        });
-      })
-    );
+      await Promise.all(
+        cardsToDelete.map(async ({ playerId, matchId }) => {
+          await fetch(`/api/cards?playerId=${playerId}&matchId=${matchId}`, {
+            method: "DELETE",
+          });
+        })
+      );
 
-    // 1. POST each card to the cards API and collect their IDs
-    await Promise.all(
-      (cards || []).map(async (card) => {
-        await fetch("/api/cards", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(card),
-        });
-      })
-    );
+      // 1. POST each card to the cards API and collect their IDs
+      await Promise.all(
+        (cards || []).map(async (card) => {
+          await fetch("/api/cards", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(card),
+          });
+        })
+      );
 
-    // 2. Update the match result, WITHOUT referencing card IDs
-    const updatedGame = {
-      _id: selectedMatchId,
-      scoreA: Object.values(scoresA).reduce((sum, val) => sum + (val || 0), 0),
-      scoreB: Object.values(scoresB).reduce((sum, val) => sum + (val || 0), 0),
-      status: "played",
-      goals,
-    };
+      // 2. Update the match result, WITHOUT referencing card IDs
+      const updatedGame = {
+        _id: selectedMatchId,
+        scoreA: Object.values(scoresA).reduce(
+          (sum, val) => sum + (val || 0),
+          0
+        ),
+        scoreB: Object.values(scoresB).reduce(
+          (sum, val) => sum + (val || 0),
+          0
+        ),
+        status: "played",
+        goals,
+      };
 
-    await fetch(`/api/games`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updatedGame),
-    });
+      await fetch(`/api/games`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedGame),
+      });
 
-    await refreshResults({
-      selectedMatchId,
-      goals,
-      cards,
-      setTeams,
-      setSchedule,
-    });
-    await refreshScorers();
+      // 3. Increment gamesPlayed for each player who played
+      await Promise.all(
+        playersWhoPlayed.map(async (playerId) => {
+          const response = await fetch(`/api/players?id=${playerId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              $inc: { gamesPlayed: 1 }, // Use MongoDB $inc to increment
+            }),
+          });
 
-    setSuccessMessage("Match modifié avec succès !");
-    setTimeout(() => setSuccessMessage(""), 2000);
-    setActiveMenu("");
+          if (!response.ok) {
+            console.error(
+              `Failed to update gamesPlayed for player ${playerId}`
+            );
+          }
+        })
+      );
+
+      // 4. Continue with existing refresh logic
+      await refreshResults({
+        selectedMatchId,
+        goals,
+        cards,
+        setTeams,
+        setSchedule,
+      });
+      await refreshScorers();
+
+      setSuccessMessage("Match modifié avec succès !");
+      setTimeout(() => setSuccessMessage(""), 2000);
+      setActiveMenu("");
+    } catch (error) {
+      console.error("Error submitting match:", error);
+      setSuccessMessage("Erreur lors de la soumission du match");
+      setTimeout(() => setSuccessMessage(""), 3000);
+    }
   };
 
   const handleResetSuccess = async () => {
