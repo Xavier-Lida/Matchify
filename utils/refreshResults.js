@@ -50,11 +50,10 @@ export async function refreshResults({
         goals,
         cards
       );
-      await fetch(`/api/players`, {
+      await fetch(`/api/players?id=${player._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          _id: player._id,
           goals: stats.goals,
           yellowCards: stats.yellowCards,
           redCards: stats.redCards,

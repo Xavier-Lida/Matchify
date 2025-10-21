@@ -25,6 +25,7 @@ export async function refreshScorers() {
           (c) => c.type === "yellow" || c.type === "yellow/red"
         ).length;
         const redCards = playerCards.filter((c) => c.type === "red").length;
+
         const goalsCount = playedGames.reduce(
           (sum, game) =>
             sum +
@@ -34,12 +35,13 @@ export async function refreshScorers() {
           0
         );
 
-        // 2. Update player's stats
-        await fetch(`/api/players`, {
+        // 2. Update player's stats - ADD ?id= query parameter
+        await fetch(`/api/players?id=${player._id}`, {
+          // ✅ Add this
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            _id: player._id,
+            // Remove _id from body since it's now in query param
             goals: goalsCount,
             yellowCards,
             redCards,
