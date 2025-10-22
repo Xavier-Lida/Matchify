@@ -55,8 +55,6 @@ export async function refreshResults({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           goals: stats.goals,
-          yellowCards: stats.yellowCards,
-          redCards: stats.redCards,
         }),
       });
     })
