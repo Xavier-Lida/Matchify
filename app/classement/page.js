@@ -6,7 +6,7 @@ import LeaderboardContainer from "@/component/leaderboard/LeaderboardContainer";
 const initialTeamFilters = [
   {
     name: "trimester",
-    value: "1",
+    value: "2",
     options: [
       { value: "1", label: "Trimestre 1" },
       { value: "2", label: "Trimestre 2" },
