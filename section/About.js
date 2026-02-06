@@ -6,7 +6,7 @@ export default function About() {
         <h1 className="text-6xl font-bold mb-6 text-center">
           Ligue Futsal Mauricie
             <object
-                data="/REGLEMENTS.pdf"
+                data="public/REGLEMENTS.pdf"
                 type="application/pdf"
                 width="100%"
                 height="30px"
