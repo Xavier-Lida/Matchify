@@ -19,7 +19,7 @@ function Footer() {
             </svg>
           </a>
           <a
-            href="https://www.instagram.com/liguefutsalmauricie"
+            href="https://www.instagram.com/liguefutsaldiadora"
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Instagram"
