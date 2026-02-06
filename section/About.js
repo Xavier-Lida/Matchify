@@ -5,6 +5,17 @@ export default function About() {
       <div className="w-full">
         <h1 className="text-6xl font-bold mb-6 text-center">
           Ligue Futsal Mauricie
+            <object
+                data="/REGLEMENTS.pdf"
+                type="application/pdf"
+                width="100%"
+                height="30px"
+                className="text-xl"
+            >
+                <a href="/REGLEMENTS.pdf" target="_blank" rel="noopener noreferrer">
+                    Ouvrir les règlements
+                </a>
+            </object>
         </h1>
       </div>
     </section>
